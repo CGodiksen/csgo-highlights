@@ -10,6 +10,8 @@
 - Automatically creating a thumbnail for the game.
 - Automatically uploading the highlight video to Youtube.
 - Continuously search hltv for interesting games and automatically start the workflow that produces the final highlight video on youtube.
+- Making highlight videos for different languages (dependent on what is available).
+- Add videos to playlists for teams/tournaments.
 
 ## Workflow
 Scheduled checks (once per day?) of the matches to check if there are any games that should be processed. If so then the processing is scheduled and saved in some kind of backlog.
