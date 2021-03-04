@@ -20,7 +20,7 @@ interface moment {
 //     getMoments();
 // };
 
-const getMoments = new Promise((resolve) => {
+const getMoments = new Promise(resolve => {
     const data = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
     const moments: moment[] = [];
 
@@ -37,4 +37,17 @@ const getMoments = new Promise((resolve) => {
     demoFile.parse(data);
 });
 
-export { getMoments };
+const getDuration = new Promise(resolve => {
+    const data = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
+    const demoFile = new demofile.DemoFile();
+
+    demoFile.on("start", ({ cancel }) => {
+        const duration: number = demoFile.header.playbackTime;
+        cancel();
+        resolve(duration);
+    });
+
+    demoFile.parse(data);
+});
+
+export { getMoments, getDuration };
