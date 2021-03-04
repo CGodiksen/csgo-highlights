@@ -1,3 +1,3 @@
-import { getHighlights } from "./services/highlights";
+import { getMoments } from "./services/highlights";
 
-getHighlights();
+void getMoments.then(moments => console.log(moments));

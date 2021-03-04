@@ -8,34 +8,33 @@ import demofile = require("demofile");
 
 interface moment {
     event: string
-    tick: string    
+    time: number
 }
 
-interface highlight {
-    moments: moment[]
-    period: string
-}
+// interface highlight {
+//     moments: moment[]
+//     period: string
+// }
 
-const getHighlights = (): void => {
-    fs.readFile("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem", (_err, buffer) => {
-        const demoFile = new demofile.DemoFile();
-        
-        demoFile.gameEvents.on("player_death", e => {
-            const victim = demoFile.entities.getByUserId(e.userid);
-            const victimName = victim ? victim.name : "unnamed";
+// const getHighlights = (): moment[] => {
+//     getMoments();
+// };
 
-            // Attacker may have disconnected so be aware. e.g. attacker could have thrown a grenade, disconnected, 
-            // then that grenade killed another player.
-            const attacker = demoFile.entities.getByUserId(e.attacker);
-            const attackerName = attacker ? attacker.name : "unnamed";
+const getMoments = new Promise((resolve) => {
+    const data = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
+    const moments: moment[] = [];
 
-            const headshotText = e.headshot ? " HS" : "";
+    const demoFile = new demofile.DemoFile();
 
-            console.log(`${attackerName} [${e.weapon}${headshotText}] ${victimName}`);
-        });
-
-        demoFile.parse(buffer);
+    demoFile.gameEvents.on("player_death", _e => {
+        moments.push({ event: "player_death", time: demoFile.currentTime });
     });
-};
 
-export { getHighlights };
+    demoFile.once("end", _e => {
+        resolve(moments);
+    });
+
+    demoFile.parse(data);
+});
+
+export { getMoments };
