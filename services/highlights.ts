@@ -14,16 +14,28 @@ interface round {
     moments: moment[]
 }
 
-// interface highlight {
-//     moments: moment[]
-//     period: string
-// }
+interface highlight {
+    moments: moment[]
+    start: number
+    end: number
+}
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
 const getHighlights = (demo: Buffer): void => {
     void extractMoments(demo).then(moments => splitIntoRounds(moments)).then(rounds => {
-        // Remove moments that are seperate from the other moments in the round.
+        const highlights: highlight[] = [];
 
+        rounds.forEach(round => {
+            const withoutStart: moment[] = round.moments.filter(moment => moment.event !== "round_start");
+            console.log(withoutStart);
+            
+            const start = withoutStart[0].time - 5;
+            const end = withoutStart.slice(-1)[0].time + 5;
+
+            highlights.push({moments: withoutStart, start: start, end: end});
+        });
+
+        console.log(highlights);
     });
 };
 
