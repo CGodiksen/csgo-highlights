@@ -3,7 +3,6 @@
 // TODO: Combine moments that are within 30 seconds of eachother (avoid too many cuts) and add 5 seconds before the first moment (maybe also after the last).
 // TODO: If the bomb is planted but no kills happen the highlight video should show the bomb blowing up.
 // TODO: Remove irrelevant moments (eco-rounds)
-import fs = require("fs");
 import demofile = require("demofile");
 
 interface moment {
@@ -20,8 +19,7 @@ interface moment {
 //     getMoments();
 // };
 
-const getMoments = new Promise(resolve => {
-    const data = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
+const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     const moments: moment[] = [];
 
     const demoFile = new demofile.DemoFile();
@@ -34,11 +32,10 @@ const getMoments = new Promise(resolve => {
         resolve(moments);
     });
 
-    demoFile.parse(data);
+    demoFile.parse(demo);
 });
 
-const getDuration = new Promise(resolve => {
-    const data = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
+const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
     const demoFile = new demofile.DemoFile();
 
     demoFile.on("start", ({ cancel }) => {
@@ -47,7 +44,7 @@ const getDuration = new Promise(resolve => {
         resolve(duration);
     });
 
-    demoFile.parse(data);
+    demoFile.parse(demo);
 });
 
 export { getMoments, getDuration };
