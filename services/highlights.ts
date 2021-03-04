@@ -22,8 +22,9 @@ interface highlight {
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
 const getHighlights = (demo: Buffer): void => {
-    void extractMoments(demo).then(moments => splitIntoRounds(moments)).then(rounds => {
+    void extractMoments(demo).then(moments => {
         const highlights: highlight[] = [];
+        const rounds = splitIntoRounds(moments);
 
         rounds.forEach(round => {
             const withoutStart: moment[] = round.moments.filter(moment => moment.event !== "round_start");
@@ -31,7 +32,7 @@ const getHighlights = (demo: Buffer): void => {
             const start = withoutStart[0].time - 5;
             const end = withoutStart.slice(-1)[0].time + 5;
 
-            highlights.push({roundNumber: round.id, moments: withoutStart, start: start, end: end});
+            highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, end: end });
         });
 
         console.log(highlights);
@@ -74,8 +75,8 @@ const extractMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve 
     demoFile.parse(demo);
 });
 
-const splitIntoRounds = (moments: moment[]): Promise<round[]> => new Promise(resolve => {
-    let round: round = {id: 1, moments: []};
+const splitIntoRounds = (moments: moment[]): round[] => {
+    let round: round = { id: 1, moments: [] };
     let roundCounter = 0;
     const rounds: round[] = [];
 
@@ -83,14 +84,14 @@ const splitIntoRounds = (moments: moment[]): Promise<round[]> => new Promise(res
         if (moment.event === "round_end") {
             rounds.push(round);
             roundCounter += 1;
-            round = {id: roundCounter, moments: []};
+            round = { id: roundCounter, moments: [] };
         } else {
-            round = {id: round.id, moments: round.moments.concat(moment)};
+            round = { id: round.id, moments: round.moments.concat(moment) };
         }
     });
 
-    resolve(rounds);
-});
+    return rounds;
+};
 
 const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
     const demoFile = new demofile.DemoFile();
