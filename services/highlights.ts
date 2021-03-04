@@ -1,7 +1,6 @@
-// TODO: Create a function that can take a filename for a demofile and return a highlight specification.
 // TODO: Combine moments that are within 30 seconds of eachother (avoid too many cuts) and add 5 seconds before the first moment (maybe also after the last).
 // TODO: If the bomb is planted but no kills happen the highlight video should show the bomb blowing up.
-// TODO: Remove irrelevant moments (eco-rounds)
+// TODO: Remove irrelevant rounds (eco-rounds)
 import demofile = require("demofile");
 
 interface moment {
@@ -15,6 +14,7 @@ interface round {
 }
 
 interface highlight {
+    roundNumber: number
     moments: moment[]
     start: number
     end: number
@@ -27,12 +27,11 @@ const getHighlights = (demo: Buffer): void => {
 
         rounds.forEach(round => {
             const withoutStart: moment[] = round.moments.filter(moment => moment.event !== "round_start");
-            console.log(withoutStart);
-            
+
             const start = withoutStart[0].time - 5;
             const end = withoutStart.slice(-1)[0].time + 5;
 
-            highlights.push({moments: withoutStart, start: start, end: end});
+            highlights.push({roundNumber: round.id, moments: withoutStart, start: start, end: end});
         });
 
         console.log(highlights);
