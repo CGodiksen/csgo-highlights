@@ -39,6 +39,10 @@ const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
         moments.push({ event: "bomb_exploded", time: demoFile.currentTime });
     });
 
+    demoFile.gameEvents.on("round_start", _e => {
+        moments.push({ event: "round_start", time: demoFile.currentTime });
+    });
+
     demoFile.gameEvents.on("round_end", _e => {
         moments.push({ event: "round_end", time: demoFile.currentTime });
     });
