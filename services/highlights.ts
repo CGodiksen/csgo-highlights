@@ -60,7 +60,8 @@ const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     demoFile.parse(demo);
 });
 
-const getRounds = (moments: moment[]): round[] => {
+// Split list of moments into the rounds the moments happened in.
+const getRounds = (moments: moment[]): Promise<round[]> => new Promise(resolve => {
     let round: round = {id: 1, moments: []};
     let roundCounter = 0;
     const rounds: round[] = [];
@@ -75,8 +76,8 @@ const getRounds = (moments: moment[]): round[] => {
         }
     });
 
-    return rounds;
-};
+    resolve(rounds);
+});
 
 const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
     const demoFile = new demofile.DemoFile();
