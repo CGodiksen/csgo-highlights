@@ -1,3 +1,3 @@
-import { getHighlightSpecification } from "./services/highlights";
+import { getHighlights } from "./services/highlights";
 
-getHighlightSpecification();
+getHighlights();
