@@ -21,10 +21,13 @@ interface round {
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
 const getHighlights = (demo: Buffer): void => {
-    void getMoments(demo).then(moments => console.log(getRounds(moments)[1]));
+    void extractMoments(demo).then(moments => splitIntoRounds(moments)).then(rounds => {
+        // Remove moments that are seperate from the other moments in the round.
+
+    });
 };
 
-const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
+const extractMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     const moments: moment[] = [];
 
     const demoFile = new demofile.DemoFile();
@@ -60,8 +63,7 @@ const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     demoFile.parse(demo);
 });
 
-// Split list of moments into the rounds the moments happened in.
-const getRounds = (moments: moment[]): Promise<round[]> => new Promise(resolve => {
+const splitIntoRounds = (moments: moment[]): Promise<round[]> => new Promise(resolve => {
     let round: round = {id: 1, moments: []};
     let roundCounter = 0;
     const rounds: round[] = [];
