@@ -1,1 +1,3 @@
-console.log("Hello world");
+import { getHighlightSpecification } from "./services/highlights";
+
+getHighlightSpecification();
