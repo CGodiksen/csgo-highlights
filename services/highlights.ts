@@ -14,7 +14,7 @@ interface moment {
 //     period: string
 // }
 
-// const getHighlights = (): moment[] => {
+// const getHighlights = (): highlight[] => {
 //     getMoments();
 // };
 
@@ -22,7 +22,7 @@ const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     const moments: moment[] = [];
 
     const demoFile = new demofile.DemoFile();
-    
+
     demoFile.gameEvents.on("player_death", _e => {
         moments.push({ event: "player_death", time: demoFile.currentTime });
     });
@@ -36,7 +36,11 @@ const getMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     });
 
     demoFile.gameEvents.on("bomb_exploded", _e => {
-        moments.push({ event:"bomb_exploded", time: demoFile.currentTime });
+        moments.push({ event: "bomb_exploded", time: demoFile.currentTime });
+    });
+
+    demoFile.gameEvents.on("round_end", _e => {
+        moments.push({ event: "round_end", time: demoFile.currentTime });
     });
 
     demoFile.once("end", _e => {
