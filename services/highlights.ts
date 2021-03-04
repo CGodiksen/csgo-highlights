@@ -21,7 +21,7 @@ interface highlight {
 }
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
-const getHighlights = (demo: Buffer): void => {
+const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolve => {
     void extractMoments(demo).then(moments => {
         const highlights: highlight[] = [];
         const rounds = splitIntoRounds(moments);
@@ -35,9 +35,9 @@ const getHighlights = (demo: Buffer): void => {
             highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, end: end });
         });
 
-        console.log(highlights);
+        resolve(highlights);
     });
-};
+});
 
 const extractMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
     const moments: moment[] = [];
