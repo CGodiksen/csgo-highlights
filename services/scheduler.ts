@@ -1,6 +1,8 @@
-// TODO: Add a function that looks at upcoming matches for a given time period and saves all matches that should be processed.
-// It should only add matches that have atleast one star.
-// TODO: The function should use HLTV.getMatches and save the ID and date to a JSON file. 
+// TODO: Add a function that starts all the different scheduled jobs which can be called from index once the program starts.
+// TODO: Once every hour the upcoming matches should be checked and if any of the games are live they should be moved to live game file. 
+// TODO: Once every 1 min the other file should have it matches checked to see if they are done and can be processed. 
+// If so this part of the scheduler should start the processing phase from download to upload.
+// This could perhaps also be done with jobs that are scheduled for specific times but that is less persistant and its hard to predict when a game is done.
 import HLTV from 'hltv';
 import fs = require("fs");
 
