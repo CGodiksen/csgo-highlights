@@ -9,33 +9,25 @@ import { LiveMatch } from 'hltv/lib/models/LiveMatch';
 
 const addLiveMatches = (): void => {
     void HLTV.getMatches().then(res => {
-        const file_path = "./data/scheduler/live.json";
-        if (!fs.existsSync(file_path)) {
-            fs.writeFile("./data/scheduler/live.json", JSON.stringify([]), err => {
-                if (err) throw err;
-            });
-        }
-        else {
-            const previousLiveMatches: unknown = JSON.parse(fs.readFileSync(file_path, "utf-8"));
-        }
+        const previousLiveMatches = fetchPreviousLiveMatches();
+        const currentLiveMatches = res.filter(match => match.live && match.stars === 0) as LiveMatch[];
+        
+        const previousLiveMatchesIds = previousLiveMatches.map(match => match.id);
+        const liveMatches = currentLiveMatches.filter(match => !previousLiveMatchesIds.includes(match.id)).concat(previousLiveMatches);
 
-        const relevantLiveMatches = res.filter(match => match.live && match.stars > 0);
-
-
-        saveLiveMatches(JSON.stringify(relevantLiveMatches));
+        saveLiveMatches(JSON.stringify(liveMatches));
     });
 };
 
 // Return the live matches currently in the live.json file. If the file does not exist it is initialized with an empty list. 
-const fetchPreviousLiveMatches = (): unknown => {
+const fetchPreviousLiveMatches = (): LiveMatch[] => {
     const file_path = "./data/scheduler/live.json";
     if (!fs.existsSync(file_path)) {
-        fs.writeFile("./data/scheduler/live.json", JSON.stringify([]), err => {
-            if (err) throw err;
-        });
+        fs.writeFileSync("./data/scheduler/live.json", JSON.stringify([]));
+        return [];
     }
     else {
-        return JSON.parse(fs.readFileSync(file_path, "utf-8"));
+        return JSON.parse(fs.readFileSync(file_path, "utf-8")) as LiveMatch[];
     }
 };
 
@@ -45,7 +37,7 @@ const saveLiveMatches = (upcomingMatches: string): void => {
         fs.mkdirSync(dir);
     }
 
-    fs.writeFile("./data/scheduler/upcoming.json", upcomingMatches, err => {
+    fs.writeFile("./data/scheduler/live.json", upcomingMatches, err => {
         if (err) throw err;
     });
 };
