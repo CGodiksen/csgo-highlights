@@ -29,10 +29,15 @@ const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolv
         rounds.forEach(round => {
             const withoutStart: moment[] = round.moments.filter(moment => moment.event !== "round_start");
 
-            const start = withoutStart[0].time - 5;
-            const end = withoutStart.slice(-1)[0].time + 5;
+            // Only adding a highlight if there is more than two events (more than bomb plant and bomb explosion).
+            if (withoutStart.length > 2) {
+                console.log();
 
-            highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, end: end });
+                const start = withoutStart[0].time - 5;
+                const end = withoutStart.slice(-1)[0].time + 5;
+
+                highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, end: end });
+            }
         });
 
         resolve(highlights);
