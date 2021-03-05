@@ -12,15 +12,18 @@ const addUpcomingMatches = (dayLookhead: number): void => {
         const epochLimit = Date.now() + (dayLookhead * 24 * 60 * 60 * 1000);
 
         const relevantMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
+        saveUpcomingMatches(JSON.stringify(relevantMatches));
+    });
+};
 
-        const dir = "./data";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
+const saveUpcomingMatches = (upcomingMatches: string): void => {
+    const dir = "./data/scheduler";
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
 
-        fs.appendFile("./data/upcoming.json", JSON.stringify(relevantMatches), err => {
-            if (err) throw err;
-        });
+    fs.writeFile("./data/scheduler/upcoming.json", upcomingMatches, err => {
+        if (err) throw err;
     });
 };
 
