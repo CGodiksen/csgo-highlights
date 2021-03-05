@@ -7,23 +7,25 @@ import HLTV from 'hltv';
 import fs = require("fs");
 import { LiveMatch } from 'hltv/lib/models/LiveMatch';
 
-const addUpcomingMatches = (): void => {
+const addUpcomingMatches = (dayLookahead: number): void => {
     void HLTV.getMatches().then(res => {
         const previousUpcomingMatches = fetchPreviousUpcomingMatches();
-        const currentUpcomingMatches = res.filter(match => match.live && match.stars === 0) as LiveMatch[];
+
+        // The limit for how far we look ahead when parsing upcoming matches.
+        const epochLimit = Date.now() + (dayLookahead * 24 * 60 * 60 * 1000);
+        let upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
         
         const previousUpcomingMatchesIds = previousUpcomingMatches.map(match => match.id);
-        const upcomingMatches = currentUpcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id)).concat(previousUpcomingMatches);
+        upcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id)).concat(previousUpcomingMatches);
 
         fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(upcomingMatches));
     });
 };
 
-// Return the live matches currently in the live.json file. If the file does not exist it is initialized with an empty list. 
+// Return the upcoming matches currently in the upcoming.json file. If the file does not exist it is initialized with an empty list. 
 const fetchPreviousUpcomingMatches = (): LiveMatch[] => {
-    const file_path = "./data/scheduler/live.json";
+    const file_path = "./data/scheduler/upcoming.json";
     if (!fs.existsSync(file_path)) {
-        fs.writeFileSync("./data/scheduler/live.json", JSON.stringify([]));
         return [];
     }
     else {
