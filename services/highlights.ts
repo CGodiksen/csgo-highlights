@@ -38,6 +38,11 @@ const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolv
                     }
                 }
                 
+                // Removing the bomb explosion if the other team is saving and nothing happens between bomb plant and explosion.
+                if (withoutStart.slice(-1)[0].event === "bomb_exploded" && withoutStart.slice(-2)[0].event === "bomb_planted") {
+                    withoutStart.splice(-1, 1);
+                }
+                
                 const start = withoutStart[0].time - 5;
                 const end = withoutStart.slice(-1)[0].time + 5;
 
