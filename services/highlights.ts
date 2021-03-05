@@ -31,8 +31,13 @@ const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolv
 
             // Only adding a highlight if there is more than two events (more than bomb plant and bomb explosion).
             if (withoutStart.length > 2) {
-                console.log();
-
+                // Removing kills that are seperate from the actual highlight of the round.
+                for (let i = 1; i >= 0; i--) {
+                    if (withoutStart[i].event === "player_death" && (withoutStart[i + 1].time - withoutStart[i].time) > 30) {
+                        withoutStart.splice(i, 1);
+                    }
+                }
+                
                 const start = withoutStart[0].time - 5;
                 const end = withoutStart.slice(-1)[0].time + 5;
 
