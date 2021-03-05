@@ -1,5 +1,3 @@
-// TODO: Combine moments that are within 30 seconds of eachother (avoid too many cuts) and add 5 seconds before the first moment (maybe also after the last).
-// TODO: If the bomb is planted but no kills happen the highlight video should show the bomb blowing up.
 // TODO: Remove irrelevant rounds (eco-rounds)
 import demofile = require("demofile");
 
