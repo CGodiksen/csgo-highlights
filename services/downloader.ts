@@ -8,10 +8,16 @@
 import axios from 'axios';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
+import { Demo } from 'hltv/lib/models/Demo';
 
 const downloadDemo = (match: FullMatch): void => {
-    const demoURL = match.demos.find(demo => demo.name === "GOTV Demo")?.link;
-    const savePath = `./data/${match.id}/demos.zip`;
+    const saveFolder = `./data/${match.id}/`;
+    
+};
+
+const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => new Promise(resolve => {
+    const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
+    const savePath = `${saveFolder}demos.zip`;
 
     if (demoURL) {
         void axios({
@@ -27,7 +33,7 @@ const downloadDemo = (match: FullMatch): void => {
             link.click();
         });
     }
-};
+});
 
 // Return the exact timestamp of when the game started in the VOD.
 const findGameStart = (): void => {
