@@ -14,15 +14,15 @@ const addUpcomingMatches = (dayLookahead: number): void => {
         // The limit for how far we look ahead when parsing upcoming matches.
         const epochLimit = Date.now() + (dayLookahead * 24 * 60 * 60 * 1000);
         let upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
-        
+
         const previousUpcomingMatchesIds = previousUpcomingMatches.map(match => match.id);
         upcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id));
-        
+
         fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(upcomingMatches.concat(previousUpcomingMatches)));
     });
 };
 
-// Return the upcoming matches currently in the upcoming.json file. If the file does not exist it is initialized with an empty list. 
+// Return the upcoming matches currently in the upcoming.json file. Return empty list if the file does not exist. 
 const fetchPreviousUpcomingMatches = (): UpcomingMatch[] => {
     const file_path = "./data/scheduler/upcoming.json";
     if (!fs.existsSync(file_path)) {
@@ -35,10 +35,16 @@ const fetchPreviousUpcomingMatches = (): UpcomingMatch[] => {
 
 // Checks if any games are done, and stars processing if they are ready.
 const checkIfDone = (matches: UpcomingMatch[]): void => {
-    // Run through matches
-    // If any matches are "ready" according to the time offset then check them with HLTV API.
-    // If is ready to be processed then start (just log for now since processing is not ready yet)
-    console.log(matches);
+    matches.map(match => {
+        if (match.date && match.format && match.date + getTimeOffset(match.format) < Date.now()) {
+            void HLTV.getMatch({ id: match.id }).then(res => {
+                if (res.demos && res.streams) {
+                    // Start processing here.
+                    console.log(res);
+                }
+            });
+        }
+    });
 };
 
 // Return the time in milliseconds we expect a match with the given format to take.
@@ -53,4 +59,4 @@ const getTimeOffset = (format: string): number => {
     }
 };
 
-export { addUpcomingMatches, getTimeOffset };
+export { addUpcomingMatches, checkIfDone };
