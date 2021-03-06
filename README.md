@@ -17,16 +17,16 @@ Automatically fetching, cutting and uploading highlight videos of professional C
 - Add videos to playlists for teams/tournaments.
 
 ### Workflow
-Scheduled checks (once per day?) of the matches to check if there are any games that should be processed. If so then the processing is scheduled and saved in some kind of backlog.
+Scheduler is constantly running and checking HLTV once per day to add upcoming matches that should be processed to upcoming.json. Every 10 minutes we check the upcoming matches
+file to see if any of the games are done and ready to be fully processed. When a game is ready we call the processor with the game as parameter and start the full process.
 
-The processing itself involves downloading the GOTV demo and the sections of the twitch stream that relate to the game(s). 
-Then the GOTV demo should be processed to find all highlights and when they happened. This should then be further processed 
-to get a specification of all the clips that are going to be used in the highlight video. This specification should be a start 
-time and end time for each clip.Next the specification should be used to cut the clips out of the full video and merge them 
-together into a highlight video.  Furthermore a scoreboard can be created and added as the last 5 seconds of the video. 
+The processor starts by calling the downloader and downloading the demo file. While this is happening we also start the process of downloaded the vods by first finding
+the exact start time of each game in the vod and thereafter downloading each game. When the demo file is downloaded we can call the highlighter module and use it to get a
+highlight specification. When we have this highlight specification and the games are done downloading we start the cutter that cuts each highlight out of the vods and
+combines them into a single video.
 
-Based on the information from the match page on hltv (logos, tournament) a thumbnail and title should be created.The highlight 
-video should then be uploaded to a Youtube channel.
+While this is happening we can also start the uploader module which creates a thumbnail, title, descripion and so on for the new highlight video. When the cutter is done
+and metadata has been collected we can upload the video using the Youtube API.
 
 ### Modules
 #### hltv-scraper (maybe use https://github.com/gigobyte/HLTV) 

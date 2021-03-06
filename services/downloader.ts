@@ -21,10 +21,10 @@ const findGameStart = (): void => {
 // Return the time left in the round on a specific frame of the VOD. 
 const getRoundTime = (framePath: string) => {
     // Creates a client
-    const client = new vision.ImageAnnotatorClient();;
+    const client = new vision.ImageAnnotatorClient();
 
     // Performs text detection on the local file
-    client.textDetection(framePath).then(result => {
+    void client.textDetection(framePath).then(result => {
         const detections = result[0].textAnnotations;
         console.log('Text:');
     
