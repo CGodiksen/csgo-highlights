@@ -5,7 +5,7 @@
 // This could perhaps also be done with jobs that are scheduled for specific times but that is less persistant and its hard to predict when a game is done.
 import HLTV from 'hltv';
 import fs = require("fs");
-import { LiveMatch } from 'hltv/lib/models/LiveMatch';
+import { UpcomingMatch } from 'hltv/lib/models/UpcomingMatch';
 
 const addUpcomingMatches = (dayLookahead: number): void => {
     void HLTV.getMatches().then(res => {
@@ -13,23 +13,38 @@ const addUpcomingMatches = (dayLookahead: number): void => {
 
         // The limit for how far we look ahead when parsing upcoming matches.
         const epochLimit = Date.now() + (dayLookahead * 24 * 60 * 60 * 1000);
-        let upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
+        const upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
         
         const previousUpcomingMatchesIds = previousUpcomingMatches.map(match => match.id);
-        upcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id)).concat(previousUpcomingMatches);
+        const newUpcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id)) as UpcomingMatch[];
+        
+        // Change "date" to signify when we expect the game to be over at the earliest.
+        newUpcomingMatches.map(match => match.date = match.date + getTimeOffset(match.format));
 
-        fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(upcomingMatches));
+        fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(newUpcomingMatches.concat(previousUpcomingMatches)));
     });
 };
 
 // Return the upcoming matches currently in the upcoming.json file. If the file does not exist it is initialized with an empty list. 
-const fetchPreviousUpcomingMatches = (): LiveMatch[] => {
+const fetchPreviousUpcomingMatches = (): UpcomingMatch[] => {
     const file_path = "./data/scheduler/upcoming.json";
     if (!fs.existsSync(file_path)) {
         return [];
     }
     else {
-        return JSON.parse(fs.readFileSync(file_path, "utf-8")) as LiveMatch[];
+        return JSON.parse(fs.readFileSync(file_path, "utf-8")) as UpcomingMatch[];
+    }
+};
+
+// Return the time in milliseconds we expect a match with the given format to take.
+const getTimeOffset = (format: string): number => {
+    switch (format) {
+        case "bo5":
+            return 10800000;
+        case "bo3":
+            return 7200000;
+        default:
+            return 3600000;
     }
 };
 
