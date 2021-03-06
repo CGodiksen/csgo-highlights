@@ -13,15 +13,12 @@ const addUpcomingMatches = (dayLookahead: number): void => {
 
         // The limit for how far we look ahead when parsing upcoming matches.
         const epochLimit = Date.now() + (dayLookahead * 24 * 60 * 60 * 1000);
-        const upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
+        let upcomingMatches = res.filter(match => !match.live && match.date && match.date < epochLimit && match.stars > 0);
         
         const previousUpcomingMatchesIds = previousUpcomingMatches.map(match => match.id);
-        const newUpcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id)) as UpcomingMatch[];
+        upcomingMatches = upcomingMatches.filter(match => !previousUpcomingMatchesIds.includes(match.id));
         
-        // Change "date" to signify when we expect the game to be over at the earliest.
-        newUpcomingMatches.map(match => match.date = match.date + getTimeOffset(match.format));
-
-        fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(newUpcomingMatches.concat(previousUpcomingMatches)));
+        fs.writeFileSync("./data/scheduler/upcoming.json", JSON.stringify(upcomingMatches.concat(previousUpcomingMatches)));
     });
 };
 
@@ -48,4 +45,4 @@ const getTimeOffset = (format: string): number => {
     }
 };
 
-export { addUpcomingMatches };
+export { addUpcomingMatches, getTimeOffset };
