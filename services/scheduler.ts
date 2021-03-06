@@ -1,11 +1,13 @@
 // TODO: Add a function that starts all the different scheduled jobs which can be called from index once the program starts.
-// TODO: Once every 45 minutes a function should check if there are any new live games. 
-// TODO: Once every 10 min a function should check if the live games are finished and ready to be processed.
-// If so this part of the scheduler should start the processing phase from download to upload.
-// This could perhaps also be done with jobs that are scheduled for specific times but that is less persistant and its hard to predict when a game is done.
+
 import HLTV from 'hltv';
 import fs = require("fs");
 import { UpcomingMatch } from 'hltv/lib/models/UpcomingMatch';
+
+// Start the different jobs and runs them according to the given interval.
+const startScheduler = (addUpcomingInterval: number, checkIfDoneInterval: number, dayLookahead: number): void => {
+    console.log(dayLookahead);
+};
 
 const addUpcomingMatches = (dayLookahead: number): void => {
     void HLTV.getMatches().then(res => {
@@ -59,4 +61,4 @@ const getTimeOffset = (format: string): number => {
     }
 };
 
-export { addUpcomingMatches, checkIfDone };
+export { startScheduler };
