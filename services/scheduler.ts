@@ -33,6 +33,14 @@ const fetchPreviousUpcomingMatches = (): UpcomingMatch[] => {
     }
 };
 
+// Checks if any games are done, and stars processing if they are ready.
+const checkIfDone = (matches: UpcomingMatch[]): void => {
+    // Run through matches
+    // If any matches are "ready" according to the time offset then check them with HLTV API.
+    // If is ready to be processed then start (just log for now since processing is not ready yet)
+    console.log(matches);
+};
+
 // Return the time in milliseconds we expect a match with the given format to take.
 const getTimeOffset = (format: string): number => {
     switch (format) {
