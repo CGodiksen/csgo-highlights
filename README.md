@@ -29,9 +29,6 @@ While this is happening we can also start the uploader module which creates a th
 and metadata has been collected we can upload the video using the Youtube API.
 
 ### Modules
-#### hltv-scraper (maybe use https://github.com/gigobyte/HLTV) 
-Should be able to scrape information (which games should be processed) and be able to get the download links for both the vods and the GOTV demo file.
-
 #### scheduler
 Should check hltv (with the above scraper) and based on the results schedule jobs (games that should be processed). These jobs should be saved to persistent storage.
 
@@ -41,11 +38,11 @@ Should provide a “main” function for processing a match fully. The “main�
 #### downloader
 Provides functions to download GOTV demo and the specific sections of the correct twitch stream which contain the match(es).
 
-#### highlights
+#### highligher
 Given a demo file it should be able to create a specification the clips that should be cut from the match video and merged together.
 
-#### video-cutter
+#### cutter
 Given a match video and a highlight specification it should cut the video into a highlight video. It should also add the scoreboard for 5 seconds after the game.
 
-#### youtube
+#### uploader
 Given a highlight video and the match page it should create a thumbnail, title, description, keywords and category and upload the video to youtube.
