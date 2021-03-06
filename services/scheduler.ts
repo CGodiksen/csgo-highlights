@@ -1,12 +1,13 @@
-// TODO: Add a function that starts all the different scheduled jobs which can be called from index once the program starts.
-
 import HLTV from 'hltv';
 import fs = require("fs");
 import { UpcomingMatch } from 'hltv/lib/models/UpcomingMatch';
 
 // Start the different jobs and runs them according to the given interval.
 const startScheduler = (addUpcomingInterval: number, checkIfDoneInterval: number, dayLookahead: number): void => {
-    console.log(dayLookahead);
+    addUpcomingMatches(dayLookahead);
+    
+    setInterval(addUpcomingMatches.bind(null, dayLookahead), addUpcomingInterval * 60000);
+    setInterval(checkIfDone, checkIfDoneInterval * 60000);
 };
 
 const addUpcomingMatches = (dayLookahead: number): void => {
