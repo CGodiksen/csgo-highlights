@@ -1,6 +1,7 @@
 // import fs = require("fs");
 // import { getHighlights, getDuration } from "./services/highlighter";
 import { startScheduler } from "./services/scheduler";
+require('dotenv');
 
 // Adding new upcoming matches once every day and checking if any games are done every 15 minutes. 
 startScheduler(1440, 15, 2);
