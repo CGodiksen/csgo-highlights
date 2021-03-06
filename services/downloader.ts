@@ -5,12 +5,28 @@
 // TODO: Add a function that can retrieve all vods of the match based on a match id.
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
-require('dotenv');
+import axios from 'axios';
 import vision from '@google-cloud/vision';
-//import HLTV from 'hltv';
+import { FullMatch } from 'hltv/lib/models/FullMatch';
 
-const downloadDemo = (): void => {
-    console.log();
+const downloadDemo = (match: FullMatch): void => {
+    const demoURL = match.demos.find(demo => demo.name === "GOTV Demo")?.link;
+    const savePath = `./data/${match.id}/demos.zip`;
+
+    if (demoURL) {
+        void axios({
+            url: `https://www.hltv.org${demoURL}`,
+            method: 'GET',
+            responseType: 'blob',
+        }).then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', savePath);
+            document.body.appendChild(link);
+            link.click();
+        });
+    }
 };
 
 // Return the exact timestamp of when the game started in the VOD.
@@ -27,7 +43,7 @@ const getRoundTime = (framePath: string) => {
     void client.textDetection(framePath).then(result => {
         const detections = result[0].textAnnotations;
         console.log('Text:');
-    
+
         if (detections) {
             detections.forEach(text => console.log(text));
         }
