@@ -10,6 +10,12 @@ import util from 'util';
 import exec from 'child_process';
 const promiseExec = util.promisify(exec.exec);
 
+interface VodLink {
+    providor: "Twitch" | "Youtube"
+    url: string
+    vodStart: string
+}
+
 const downloadVods = (match: FullMatch): void => {
     const saveFolder = `data/${match.id}/vods/`;
     const vodLinks = getVodLinks(match);
@@ -19,7 +25,7 @@ const downloadVods = (match: FullMatch): void => {
     });
 };
 
-const getVodLinks = (match: FullMatch): string[] => {
+const getVodLinks = (match: FullMatch): VodLink[] => {
     const gameCount = match.maps.filter(map => map.statsId).length;
     const vodLinks: string[] = [];
 
@@ -27,6 +33,7 @@ const getVodLinks = (match: FullMatch): string[] => {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
+
             vodLinks.push(link);
         }
     }
@@ -34,7 +41,7 @@ const getVodLinks = (match: FullMatch): string[] => {
 };
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
-const downloadVod = async (link: string, saveFolder: string): Promise<void> => {
+const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => {
     await findGameStart(link);
     console.log(saveFolder);
     // TODO: Find the actual start of the game and change the links to reflect this.
@@ -45,9 +52,9 @@ const downloadVod = async (link: string, saveFolder: string): Promise<void> => {
 };
 
 // Return the exact timestamp of when the game started in the VOD.
-const findGameStart = async (link: string): Promise<void> => {
+const findGameStart = async (link: VodLink): Promise<void> => {
     try {
-        const { stdout, stderr } = await promiseExec(`youtube-dl -g ${link}`);
+        const { stdout, stderr } = await promiseExec(`youtube-dl -g ${link.url}`);
         console.log(getRoundTime("./data/test.PNG"));
         console.log('stdout:', stdout);
         console.log('stderr:', stderr);
