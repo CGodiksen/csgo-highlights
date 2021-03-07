@@ -12,7 +12,7 @@ const downloadDemos = async (match: FullMatch): Promise<string> => {
         const rarFile = await downloadDemoRar(match.demos, saveFolder);
         
         // Extracting the dem files from the downloaded rar and deleting it after.
-        exec.execSync("unrar e data/2306295/demos/demos.rar data/2306295/demos/");
+        exec.execSync(`unrar e ${rarFile} ${saveFolder}`);
         fse.unlinkSync(rarFile);
     }
     catch (downloadDemoError) {
@@ -29,7 +29,6 @@ const downloadDemoRar = async (demos: Demo[], saveFolder: string): Promise<strin
     if (demoURL) {
         try {
             const res = await axios.get(`https://www.hltv.org${demoURL}`, { responseType: 'arraybuffer' });
-            console.log(res);
             
             await fse.outputFile(savePath, res.data);
         } catch (downloadRarError) {
