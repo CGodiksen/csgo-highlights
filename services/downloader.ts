@@ -6,17 +6,20 @@
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
 import fse from "fs-extra";
+import exec from 'child_process';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
-// TODO: Make the function extract the files from the zip file and delete the original zip file.
 const downloadDemo = async (match: FullMatch): Promise<string> => {
     const saveFolder = `data/${match.id}/demos/`;
 
     try {
-        await downloadDemoZip(match.demos, saveFolder);
+        const zipFile = await downloadDemoZip(match.demos, saveFolder);
         
+        // Extracting the dem files from the downloaded rar and deleting it after.
+        exec.execSync("unrar e data/2306295/demos/demos.rar data/2306295/demos/");
+        fse.unlinkSync(zipFile);
     }
     catch (downloadDemoError) {
         console.error(downloadDemoError);

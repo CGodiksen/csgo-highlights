@@ -8,13 +8,10 @@
 // void getDuration(demo).then(duration => console.log(duration));
 // void getHighlights(demo).then(highlights => console.log(highlights));
 
-// import { downloadDemo } from "./services/downloader";
-// import HLTV from 'hltv';
-// void HLTV.getMatch({ id: 2306295 }).then(res => {
-//     downloadDemo(res)
-//         .then(demoFolder => console.log(demoFolder))
-//         .catch(e => console.log(e));
-// });
-
-import exec from 'child_process';
-exec.exec("unrar e data/2306295/demos/demos.rar data/2306295/demos/", error => console.error(error));
+import { downloadDemo } from "./services/downloader";
+import HLTV from 'hltv';
+void HLTV.getMatch({ id: 2306295 }).then(res => {
+    downloadDemo(res)
+        .then(demoFolder => console.log(demoFolder))
+        .catch(e => console.log(e));
+});
