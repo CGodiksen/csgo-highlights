@@ -17,8 +17,8 @@ const downloadDemo = async (match: FullMatch): Promise<string | void> => {
     try {
         return await downloadDemoZip(match.demos, saveFolder);
     }
-    catch (downloadZipError) {
-        console.error(downloadZipError);
+    catch (downloadDemoError) {
+        console.error(downloadDemoError);
     }
 };
 
@@ -30,13 +30,10 @@ const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<strin
         try {
             const res = await axios.get(`https://www.hltv.org${demoURL}`, { responseType: 'arraybuffer' });
             console.log(res);
-            try {
-                await fse.outputFile(savePath, res.data);
-            } catch (writeError) {
-                console.error(writeError);
-            }
-        } catch (downloadError) {
-            console.error(downloadError);
+            
+            await fse.outputFile(savePath, res.data);
+        } catch (downloadZipError) {
+            console.error(downloadZipError);
         }
         return savePath;
     } else {
