@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-// TODO: Add a function that can retrieve all vods of the match based on a match id.
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
@@ -11,7 +10,7 @@ import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
-const downloadDemo = async (match: FullMatch): Promise<string> => {
+const downloadDemos = async (match: FullMatch): Promise<string> => {
     const saveFolder = `data/${match.id}/demos/`;
 
     try {
@@ -27,6 +26,7 @@ const downloadDemo = async (match: FullMatch): Promise<string> => {
     return saveFolder;
 };
 
+// Download the rar file containing all demo files for the given match.
 const downloadDemoRar = async (demos: Demo[], saveFolder: string): Promise<string> => {
     const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
     const savePath = `${saveFolder}demos.rar`;
@@ -67,4 +67,4 @@ const getRoundTime = (framePath: string) => {
     });
 };
 
-export { downloadDemo, findGameStart };
+export { downloadDemos, findGameStart };
