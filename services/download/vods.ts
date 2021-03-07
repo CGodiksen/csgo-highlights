@@ -15,12 +15,16 @@ const downloadVods = (match: FullMatch): void => {
     vodLinks.forEach(link => downloadVod(link, saveFolder));
 };
 
-const getVodLinks = (match: FullMatch) => {
+const getVodLinks = (match: FullMatch): string[] => {
     const gameCount = match.maps.filter(map => map.statsId).length;
-    const vodLinks: string | unknown[] = [];
+    const vodLinks: string[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
-        vodLinks.push(match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link);
+        const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
+
+        if (link) {
+            vodLinks.push(link);
+        }
     }
 
     return vodLinks;
