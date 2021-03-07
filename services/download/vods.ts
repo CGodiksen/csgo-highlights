@@ -76,16 +76,15 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
 const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => {
-    await findGameStart(link, saveFolder);
-    // TODO: Find the actual start of the game and change the links to reflect this.
+    await calibrateVodStart(link, saveFolder);
+    
     // TODO: Find the approximate duration of the game.
-    // TODO: Get the youtube-dl -g download link.
     // TODO: Use ffmpeg to download the video from the above link with the above duration.
     // TODO: Return the save path when the download is done.
 };
 
 // Find the actual start of the game and change the link to reflect this.
-const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
+const calibrateVodStart = async (link: VodLink, saveFolder: string): Promise<void> => {
     try {
         // Downloading a single frame from the VOD.
         const fileName = `${saveFolder}${link.game}.jpg`;
@@ -113,9 +112,7 @@ const getRoundTime = async (framePath: string): Promise<number | void> => {
 
     // Performs text detection on the local file
     const result = await client.textDetection(framePath);
-
     const detections = result[0].textAnnotations;
-    console.log('Text:');
 
     if (detections) {
         // Extracting the timer detection.
