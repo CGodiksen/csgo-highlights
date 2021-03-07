@@ -47,10 +47,12 @@ const parseLink = (link: string): VodLink => {
     let vodStart = 0;
 
     if (provider === "Twitch") {
+        // Example twitch link: https://player.twitch.tv/?video=v100653684&autoplay=true&t=4h58m14s&parent=www.hltv.org
         url = split_link[0];
         const timeStamp = split_link[2].slice(2).replace("h", ":").replace("m", ":").replace("s", "").split(":");
         vodStart = (+timeStamp[0]) * 60 * 60 + (+timeStamp[1]) * 60 + (+timeStamp[2]);
     } else {
+        // Example youtube link: https://www.youtube.com/embed/c38Qu1qktJM?autoplay=1&start=32
         url = split_link[0].split("?")[0];
         vodStart = parseInt(split_link[1].slice(6));
     }
@@ -72,7 +74,6 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 const findGameStart = async (link: VodLink): Promise<void> => {
     try {
         const { stdout, stderr } = await promiseExec(`youtube-dl -g ${link.url}`);
-        console.log(getRoundTime("./data/test.PNG"));
         console.log('stdout:', stdout);
         console.log('stderr:', stderr);
     } catch (e) {
@@ -81,7 +82,7 @@ const findGameStart = async (link: VodLink): Promise<void> => {
 };
 
 // Return the time left in the round on a specific frame of the VOD. 
-const getRoundTime = (framePath: string) => {
+const getRoundTime = (framePath: string): number => {
     // Creates a client
     const client = new vision.ImageAnnotatorClient();
 
@@ -94,6 +95,7 @@ const getRoundTime = (framePath: string) => {
             detections.forEach(text => console.log(text));
         }
     });
+    return 0;
 };
 
-export { downloadVods };
+export { getRoundTime, downloadVods };
