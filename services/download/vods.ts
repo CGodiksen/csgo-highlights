@@ -6,11 +6,17 @@
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 
+import util from 'util';
+import exec from 'child_process';
+const promiseExec = util.promisify(exec.exec);
+
 const downloadVods = (match: FullMatch): void => {
     const saveFolder = `data/${match.id}/vods/`;
     const vodLinks = getVodLinks(match);
 
-    vodLinks.forEach(link => downloadVod(link, saveFolder));
+    vodLinks.forEach(link => {
+        void downloadVod(link, saveFolder);
+    });
 };
 
 const getVodLinks = (match: FullMatch): string[] => {
@@ -28,8 +34,8 @@ const getVodLinks = (match: FullMatch): string[] => {
 };
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
-const downloadVod = (link: string, saveFolder: string): void => {
-    console.log(link);
+const downloadVod = async (link: string, saveFolder: string): Promise<void> => {
+    await findGameStart(link);
     console.log(saveFolder);
     // TODO: Find the actual start of the game and change the links to reflect this.
     // TODO: Find the approximate duration of the game.
@@ -39,8 +45,15 @@ const downloadVod = (link: string, saveFolder: string): void => {
 };
 
 // Return the exact timestamp of when the game started in the VOD.
-const findGameStart = (): void => {
-    console.log(getRoundTime("./data/test.PNG"));
+const findGameStart = async (link: string): Promise<void> => {
+    try {
+        const { stdout, stderr } = await promiseExec(`youtube-dl -g ${link}`);
+        console.log(getRoundTime("./data/test.PNG"));
+        console.log('stdout:', stdout);
+        console.log('stderr:', stderr);
+    } catch (e) {
+        console.error(e);
+    }
 };
 
 // Return the time left in the round on a specific frame of the VOD. 
