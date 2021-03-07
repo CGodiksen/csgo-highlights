@@ -15,11 +15,11 @@ const downloadDemo = async (match: FullMatch): Promise<string> => {
     const saveFolder = `data/${match.id}/demos/`;
 
     try {
-        const zipFile = await downloadDemoZip(match.demos, saveFolder);
+        const rarFile = await downloadDemoRar(match.demos, saveFolder);
         
         // Extracting the dem files from the downloaded rar and deleting it after.
         exec.execSync("unrar e data/2306295/demos/demos.rar data/2306295/demos/");
-        fse.unlinkSync(zipFile);
+        fse.unlinkSync(rarFile);
     }
     catch (downloadDemoError) {
         console.error(downloadDemoError);
@@ -27,7 +27,7 @@ const downloadDemo = async (match: FullMatch): Promise<string> => {
     return saveFolder;
 };
 
-const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<string> => {
+const downloadDemoRar = async (demos: Demo[], saveFolder: string): Promise<string> => {
     const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
     const savePath = `${saveFolder}demos.rar`;
 
@@ -37,8 +37,8 @@ const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<strin
             console.log(res);
             
             await fse.outputFile(savePath, res.data);
-        } catch (downloadZipError) {
-            console.error(downloadZipError);
+        } catch (downloadRarError) {
+            console.error(downloadRarError);
         }
         return savePath;
     } else {
