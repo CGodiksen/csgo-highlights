@@ -11,20 +11,18 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
 // TODO: Make the function extract the files from the zip file and delete the original zip file.
-const downloadDemo = (match: FullMatch): Promise<string | void> => {
-    // TODO: This should not be hardcoded.
-    const saveFolder = `data/2306295/`;
+const downloadDemo = async (match: FullMatch): Promise<string | void> => {
+    const saveFolder = `data/${match.id}/`;
 
-    return new Promise(resolve => {
-        downloadDemoZip(match.demos, saveFolder)
-            .then(zipFile => {
-                resolve(zipFile);
-            })
-            .catch(e => console.log(e));
-    });
+    try {
+        return await downloadDemoZip(match.demos, saveFolder);
+    }
+    catch (downloadZipError) {
+        console.error(downloadZipError);
+    }
 };
 
-const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<string | void> => {
+const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<string> => {
     const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
     const savePath = `${saveFolder}demos.zip`;
 
@@ -34,13 +32,13 @@ const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<strin
             console.log(res);
             try {
                 await fse.outputFile(savePath, res.data);
-                return savePath;
             } catch (writeError) {
-                return console.log(writeError);
+                console.error(writeError);
             }
         } catch (downloadError) {
-            return console.log(downloadError);
+            console.error(downloadError);
         }
+        return savePath;
     } else {
         throw "Could not find demo.";
     }
