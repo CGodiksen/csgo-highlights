@@ -9,5 +9,5 @@ import HLTV from 'hltv';
 // void getDuration(demo).then(duration => console.log(duration));
 // void getHighlights(demo).then(highlights => console.log(highlights));
 void HLTV.getMatch({id: 2306295}).then(res => {
-    downloadDemo(res);
+    void downloadDemo(res).then(zipfile => console.log(zipfile));
 });

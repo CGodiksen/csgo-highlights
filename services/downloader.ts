@@ -6,22 +6,22 @@
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
 import fse from "fs-extra";
-import extract from 'extract-zip';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
-const downloadDemo = (match: FullMatch): void => {
-    const saveFolder = `/data/${match.id}/`;
-
-    void downloadDemoZip(match.demos, saveFolder)
+// TODO: Make the function extract the files from the zip file and delete the original zip file.
+const downloadDemo = (match: FullMatch): Promise<string> => {
+    // TODO: This should not be hardcoded.
+    const saveFolder = `data/2306295/`;
+    
+    return new Promise(resolve => {
+        downloadDemoZip(match.demos, saveFolder)
         .then(zipFile => {
-            // Extracting the demos in the zip file and deleting it after.
-            void extract(__dirname + zipFile, { dir: saveFolder })
-                .then(() => {
-                    fse.unlinkSync(zipFile);
-                });
-        });
+            resolve(zipFile);
+        })
+        .catch(e => console.log(e));
+    });
 };
 
 const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => {
@@ -33,6 +33,7 @@ const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => 
             axios.get(`https://www.hltv.org${demoURL}`, {
                 responseType: 'arraybuffer',
             }).then(res => {
+                console.log(res);
                 fse.outputFile(savePath, res.data).then(() => resolve(savePath));
             }).catch(e => console.log(e));
         });
