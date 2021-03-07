@@ -84,18 +84,23 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
     // TODO: Return the save path when the download is done.
 };
 
-// Return the exact timestamp of when the game started in the VOD.
+// Find the actual start of the game and change the link to reflect this.
 const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
     try {
         // Downloading a single frame from the VOD.
         const fileName = `${saveFolder}${link.game}.jpg`;
         await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
-        
+
         // Cropping the downloaded frame to focus it on the scoreboard and the timer.
         const croppedFileName = `${saveFolder}${link.game}_cropped.jpg`;
         await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
 
-        const timeLeft = await getRoundTime(croppedFileName);
+        const timeLeftOnFrame = await getRoundTime(croppedFileName);
+
+        if (timeLeftOnFrame) {
+            // Adjusting the start time based on the time left in the round on the first frame.
+            link.vodStart = link.vodStart - (135 - timeLeftOnFrame);
+        }
     } catch (e) {
         console.error(e);
     }
@@ -115,10 +120,10 @@ const getRoundTime = async (framePath: string): Promise<number | void> => {
     if (detections) {
         // Extracting the timer detection.
         const timer = detections.find(detection => detection.description && detection.description.includes(":") && detection.description.length === 4);
-        
+
         if (timer?.description) {
             const splitTimer = timer.description.split(":");
-            return (+splitTimer[0]) * 60 + (+splitTimer[1]); 
+            return (+splitTimer[0]) * 60 + (+splitTimer[1]);
         }
     }
 };
