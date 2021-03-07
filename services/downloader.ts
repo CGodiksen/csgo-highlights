@@ -14,13 +14,13 @@ import { Demo } from 'hltv/lib/models/Demo';
 const downloadDemo = (match: FullMatch): Promise<string> => {
     // TODO: This should not be hardcoded.
     const saveFolder = `data/2306295/`;
-    
+
     return new Promise(resolve => {
         downloadDemoZip(match.demos, saveFolder)
-        .then(zipFile => {
-            resolve(zipFile);
-        })
-        .catch(e => console.log(e));
+            .then(zipFile => {
+                resolve(zipFile);
+            })
+            .catch(e => console.log(e));
     });
 };
 
@@ -34,7 +34,9 @@ const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => 
                 responseType: 'arraybuffer',
             }).then(res => {
                 console.log(res);
-                fse.outputFile(savePath, res.data).then(() => resolve(savePath));
+                fse.outputFile(savePath, res.data)
+                    .then(() => resolve(savePath))
+                    .catch(e => console.log(e));
             }).catch(e => console.log(e));
         });
     } else {
