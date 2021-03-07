@@ -6,13 +6,15 @@
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
+import fs from "fs";
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
 const downloadDemo = (match: FullMatch): void => {
     const saveFolder = `./data/${match.id}/`;
-    
+
+    void downloadDemoZip(match.demos, saveFolder).then(zipFile => { console.log(zipFile); });
 };
 
 const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => new Promise(resolve => {
@@ -20,17 +22,11 @@ const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => 
     const savePath = `${saveFolder}demos.zip`;
 
     if (demoURL) {
-        void axios({
-            url: `https://www.hltv.org${demoURL}`,
-            method: 'GET',
-            responseType: 'blob',
-        }).then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', savePath);
-            document.body.appendChild(link);
-            link.click();
+        void axios.get(`https://www.hltv.org${demoURL}`, {
+            responseType: 'arraybuffer',
+        }).then(res => {
+            fs.writeFileSync(savePath, res.data);
+            resolve(savePath);
         });
     }
 });
