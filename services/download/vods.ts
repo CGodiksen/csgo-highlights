@@ -87,32 +87,40 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 // Return the exact timestamp of when the game started in the VOD.
 const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
     try {
-        const fileName = `${saveFolder}${link.game}.jpg`;
         // Downloading a single frame from the VOD.
+        const fileName = `${saveFolder}${link.game}.jpg`;
         await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
         
         // Cropping the downloaded frame to focus it on the scoreboard and the timer.
-        await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(`${saveFolder}${link.game}_cropped.jpg`);
+        const croppedFileName = `${saveFolder}${link.game}_cropped.jpg`;
+        await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
+
+        const timeLeft = await getRoundTime(croppedFileName);
     } catch (e) {
         console.error(e);
     }
 };
 
-// Return the time left in the round on a specific frame of the VOD. 
-const getRoundTime = (framePath: string): number => {
+// Return the time left in the round in seconds on a specific frame of the VOD. 
+const getRoundTime = async (framePath: string): Promise<number | void> => {
     // Creates a client
     const client = new vision.ImageAnnotatorClient();
 
     // Performs text detection on the local file
-    void client.textDetection(framePath).then(result => {
-        const detections = result[0].textAnnotations;
-        console.log('Text:');
+    const result = await client.textDetection(framePath);
 
-        if (detections) {
-            detections.forEach(text => console.log(text));
+    const detections = result[0].textAnnotations;
+    console.log('Text:');
+
+    if (detections) {
+        // Extracting the timer detection.
+        const timer = detections.find(detection => detection.description && detection.description.includes(":") && detection.description.length === 4);
+        
+        if (timer?.description) {
+            const splitTimer = timer.description.split(":");
+            return (+splitTimer[0]) * 60 + (+splitTimer[1]); 
         }
-    });
-    return 0;
+    }
 };
 
 export { getRoundTime, downloadVods };
