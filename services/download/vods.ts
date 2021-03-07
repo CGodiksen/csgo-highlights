@@ -14,18 +14,20 @@ interface VodLink {
     provider: "Twitch" | "Youtube"
     url: string
     vodStart: number
+    downloadUrls: string[]
 }
 
-const downloadVods = (match: FullMatch): void => {
+const downloadVods = async (match: FullMatch): Promise<void> => {
     const saveFolder = `data/${match.id}/vods/`;
-    const vodLinks = getVodLinks(match);
+    const vodLinks = await getVodLinks(match);
 
     vodLinks.forEach(link => {
+        
         void downloadVod(link, saveFolder);
     });
 };
 
-const getVodLinks = (match: FullMatch): VodLink[] => {
+const getVodLinks = async (match: FullMatch): Promise<VodLink[]> => {
     const gameCount = match.maps.filter(map => map.statsId).length;
     const vodLinks: VodLink[] = [];
 
@@ -33,14 +35,14 @@ const getVodLinks = (match: FullMatch): VodLink[] => {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-            vodLinks.push(parseLink(link));
+            vodLinks.push(await parseLink(link));
         }
     }
     return vodLinks;
 };
 
 // Parse a link for a vod to extract the provider, url and start time.
-const parseLink = (link: string): VodLink => {
+const parseLink = async (link: string): Promise<VodLink> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
     let url = "";
@@ -56,7 +58,21 @@ const parseLink = (link: string): VodLink => {
         url = split_link[0].split("?")[0];
         vodStart = parseInt(split_link[1].slice(6));
     }
-    return { provider: provider, url: url, vodStart: vodStart};
+
+    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url)};
+};
+
+// Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
+const getDownloadUrls = async (url: string): Promise<string[]> => {
+    let downloadUrls: string[] = [];
+    try {
+        const { stdout } = await promiseExec(`youtube-dl --youtube-skip-dash-manifest -g ${url}`);
+        downloadUrls = stdout.split("\n");
+        
+    } catch (e) {
+        console.error(e);
+    }
+    return downloadUrls;
 };
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
@@ -72,10 +88,10 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 
 // Return the exact timestamp of when the game started in the VOD.
 const findGameStart = async (link: VodLink): Promise<void> => {
+    console.log(link);
     try {
-        const { stdout, stderr } = await promiseExec(`youtube-dl -g ${link.url}`);
+        const { stdout } = await promiseExec(`youtube-dl -g ${link.url}`);
         console.log('stdout:', stdout);
-        console.log('stderr:', stderr);
     } catch (e) {
         console.error(e);
     }
