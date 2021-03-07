@@ -14,6 +14,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.8",
+    "@types/sharp": "^0.27.1",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
@@ -25,6 +26,7 @@
     "axios": "^0.21.1",
     "demofile": "^2.0.0-beta.4",
     "fs-extra": "^9.1.0",
-    "hltv": "^2.24.2"
+    "hltv": "^2.24.2",
+    "sharp": "^0.27.2"
   }
 }

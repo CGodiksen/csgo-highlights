@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-// TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
-// TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
+import sharp from 'sharp';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 
@@ -87,9 +86,13 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 
 // Return the exact timestamp of when the game started in the VOD.
 const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
-    console.log(saveFolder);
     try {
-        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${saveFolder}${link.game}.jpg`);
+        const fileName = `${saveFolder}${link.game}.jpg`;
+        // Downloading a single frame from the VOD.
+        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
+        
+        // Cropping the downloaded frame to focus it on the scoreboard and the timer.
+        await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(`${saveFolder}${link.game}_cropped.jpg`);
     } catch (e) {
         console.error(e);
     }
