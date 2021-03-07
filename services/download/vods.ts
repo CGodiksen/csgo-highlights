@@ -10,21 +10,26 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 
 const downloadVods = (match: FullMatch): void => {
     const saveFolder = `data/${match.id}/vods/`;
+    const vodLinks = getVodLinks(match);
 
-    console.log(saveFolder);
-    console.log(match);
-    console.log(getVodLinks(match));
+    vodLinks.forEach(link => downloadVod(link, saveFolder));
 };
 
 const getVodLinks = (match: FullMatch) => {
     const gameCount = match.maps.filter(map => map.statsId).length;
     const vodLinks: string | unknown[] = [];
-    
+
     for (let i = 1; i <= gameCount; i++) {
         vodLinks.push(match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link);
     }
 
     return vodLinks;
+};
+
+// Return a promise to deliver the save path after downloading the vod from the given link.
+const downloadVod = (link: string, saveFolder: string): void => {
+    console.log(link);
+    console.log(saveFolder);
 };
 
 // Return the exact timestamp of when the game started in the VOD.
