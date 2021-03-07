@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-// TODO: Workflow should be downloadVods -> find the links that should be downloaded, for each link find the actual game start and
-// estimate the max duration of the match. Then download each vod. 
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import vision from '@google-cloud/vision';
@@ -26,7 +24,6 @@ const getVodLinks = (match: FullMatch): string[] => {
             vodLinks.push(link);
         }
     }
-
     return vodLinks;
 };
 
@@ -34,6 +31,11 @@ const getVodLinks = (match: FullMatch): string[] => {
 const downloadVod = (link: string, saveFolder: string): void => {
     console.log(link);
     console.log(saveFolder);
+    // TODO: Find the actual start of the game and change the links to reflect this.
+    // TODO: Find the approximate duration of the game.
+    // TODO: Get the youtube-dl -g download link.
+    // TODO: Use ffmpeg to download the video from the above link with the above duration.
+    // TODO: Return the save path when the download is done.
 };
 
 // Return the exact timestamp of when the game started in the VOD.
