@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-// TODO: Add a function that can retrieve a demo file based on a match id
 // TODO: Add a function that can retrieve all vods of the match based on a match id.
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.

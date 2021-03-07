@@ -23,7 +23,6 @@
     "@google-cloud/vision": "^2.3.1",
     "axios": "^0.21.1",
     "demofile": "^2.0.0-beta.4",
-    "hltv": "^2.24.2",
-    "js-file-download": "^0.4.12"
+    "hltv": "^2.24.2"
   }
 }
