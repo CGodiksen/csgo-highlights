@@ -12,30 +12,34 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
 const downloadDemo = (match: FullMatch): void => {
-    const saveFolder = `./data/${match.id}/`;
+    const saveFolder = `/data/${match.id}/`;
 
     void downloadDemoZip(match.demos, saveFolder)
         .then(zipFile => {
             // Extracting the demos in the zip file and deleting it after.
-            void extract(zipFile, { dir: saveFolder })
+            void extract(__dirname + zipFile, { dir: saveFolder })
                 .then(() => {
                     fse.unlinkSync(zipFile);
                 });
         });
 };
 
-const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => new Promise(resolve => {
+const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => {
     const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
     const savePath = `${saveFolder}demos.zip`;
 
     if (demoURL) {
-        void axios.get(`https://www.hltv.org${demoURL}`, {
-            responseType: 'arraybuffer',
-        }).then(res => {
-            fse.outputFile(savePath, res.data).then(() => resolve(savePath));
+        return new Promise(resolve => {
+            axios.get(`https://www.hltv.org${demoURL}`, {
+                responseType: 'arraybuffer',
+            }).then(res => {
+                fse.outputFile(savePath, res.data).then(() => resolve(savePath));
+            }).catch(e => console.log(e));
         });
+    } else {
+        throw "Could not find demo.";
     }
-});
+};
 
 // Return the exact timestamp of when the game started in the VOD.
 const findGameStart = (): void => {
