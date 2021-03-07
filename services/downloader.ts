@@ -11,20 +11,22 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 
 // TODO: Make the function extract the files from the zip file and delete the original zip file.
-const downloadDemo = async (match: FullMatch): Promise<string | void> => {
-    const saveFolder = `data/${match.id}/`;
+const downloadDemo = async (match: FullMatch): Promise<string> => {
+    const saveFolder = `data/${match.id}/demos/`;
 
     try {
-        return await downloadDemoZip(match.demos, saveFolder);
+        await downloadDemoZip(match.demos, saveFolder);
+        
     }
     catch (downloadDemoError) {
         console.error(downloadDemoError);
     }
+    return saveFolder;
 };
 
 const downloadDemoZip = async (demos: Demo[], saveFolder: string): Promise<string> => {
     const demoURL = demos.find(demo => demo.name === "GOTV Demo")?.link;
-    const savePath = `${saveFolder}demos.zip`;
+    const savePath = `${saveFolder}demos.rar`;
 
     if (demoURL) {
         try {

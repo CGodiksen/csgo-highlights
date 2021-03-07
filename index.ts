@@ -1,15 +1,20 @@
-// import fs = require("fs");
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 // import { getHighlights, getDuration } from "./services/highlighter";
 // import { startScheduler } from "./services/scheduler";
-import { downloadDemo } from "./services/downloader";
-import HLTV from 'hltv';
 // // Adding new upcoming matches once every day and checking if any games are done every 15 minutes. 
 // startScheduler(1440, 15, 2);
 // const demo = fs.readFileSync("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem");
 // void getDuration(demo).then(duration => console.log(duration));
 // void getHighlights(demo).then(highlights => console.log(highlights));
-void HLTV.getMatch({ id: 2306295 }).then(res => {
-    downloadDemo(res)
-        .then(zipfile => console.log(zipfile))
-        .catch(e => console.log(e));
-});
+
+// import { downloadDemo } from "./services/downloader";
+// import HLTV from 'hltv';
+// void HLTV.getMatch({ id: 2306295 }).then(res => {
+//     downloadDemo(res)
+//         .then(demoFolder => console.log(demoFolder))
+//         .catch(e => console.log(e));
+// });
+
+import exec from 'child_process';
+exec.exec("unrar e data/2306295/demos/demos.rar data/2306295/demos/", error => console.error(error));

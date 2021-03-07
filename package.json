@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^2.3.1",
-    "adm-zip": "^0.5.3",
     "axios": "^0.21.1",
     "demofile": "^2.0.0-beta.4",
     "fs-extra": "^9.1.0",
