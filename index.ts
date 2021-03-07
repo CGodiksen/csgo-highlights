@@ -8,7 +8,7 @@
 // void getDuration(demo).then(duration => console.log(duration));
 // void getHighlights(demo).then(highlights => console.log(highlights));
 
-import { downloadDemos } from "./services/download/demo";
+import { downloadDemos } from "./services/download/demos";
 import HLTV from 'hltv';
 void HLTV.getMatch({ id: 2306295 }).then(res => {
     downloadDemos(res)
