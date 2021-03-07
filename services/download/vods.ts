@@ -11,6 +11,7 @@ import exec from 'child_process';
 const promiseExec = util.promisify(exec.exec);
 
 interface VodLink {
+    game: number
     provider: "Twitch" | "Youtube"
     url: string
     vodStart: number
@@ -22,7 +23,6 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     const vodLinks = await getVodLinks(match);
 
     vodLinks.forEach(link => {
-
         void downloadVod(link, saveFolder);
     });
 };
@@ -35,14 +35,14 @@ const getVodLinks = async (match: FullMatch): Promise<VodLink[]> => {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-            vodLinks.push(await parseLink(link));
+            vodLinks.push(await parseLink(link, i));
         }
     }
     return vodLinks;
 };
 
 // Parse a link for a vod to extract the provider, url and start time.
-const parseLink = async (link: string): Promise<VodLink> => {
+const parseLink = async (link: string, game: number): Promise<VodLink> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
     let url = "";
@@ -59,7 +59,7 @@ const parseLink = async (link: string): Promise<VodLink> => {
         vodStart = parseInt(split_link[1].slice(6));
     }
 
-    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url) };
+    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url), game: game };
 };
 
 // Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
@@ -89,7 +89,7 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
     console.log(saveFolder);
     try {
-        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 frame.jpg`);
+        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${saveFolder}${link.game}.jpg`);
     } catch (e) {
         console.error(e);
     }
