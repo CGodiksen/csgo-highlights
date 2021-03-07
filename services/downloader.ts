@@ -5,7 +5,7 @@
 // TODO: Add a function that first retrieves the first frame and finds when the game actually started in the vod.
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
-import fs from "fs";
+import fse from "fs-extra";
 import extract from 'extract-zip';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
@@ -19,7 +19,7 @@ const downloadDemo = (match: FullMatch): void => {
             // Extracting the demos in the zip file and deleting it after.
             void extract(zipFile, { dir: saveFolder })
                 .then(() => {
-                    fs.unlinkSync(zipFile);
+                    fse.unlinkSync(zipFile);
                 });
         });
 };
@@ -32,8 +32,7 @@ const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => 
         void axios.get(`https://www.hltv.org${demoURL}`, {
             responseType: 'arraybuffer',
         }).then(res => {
-            fs.writeFileSync(savePath, res.data);
-            resolve(savePath);
+            fse.outputFile(savePath, res.data).then(() => resolve(savePath));
         });
     }
 });

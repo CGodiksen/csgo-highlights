@@ -13,6 +13,7 @@
   "author": "Christian Godiksen",
   "license": "MIT",
   "devDependencies": {
+    "@types/fs-extra": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
@@ -24,6 +25,7 @@
     "axios": "^0.21.1",
     "demofile": "^2.0.0-beta.4",
     "extract-zip": "^2.0.1",
+    "fs-extra": "^9.1.0",
     "hltv": "^2.24.2"
   }
 }
