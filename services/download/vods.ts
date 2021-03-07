@@ -22,7 +22,7 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     const vodLinks = await getVodLinks(match);
 
     vodLinks.forEach(link => {
-        
+
         void downloadVod(link, saveFolder);
     });
 };
@@ -59,7 +59,7 @@ const parseLink = async (link: string): Promise<VodLink> => {
         vodStart = parseInt(split_link[1].slice(6));
     }
 
-    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url)};
+    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url) };
 };
 
 // Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
@@ -68,7 +68,7 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
     try {
         const { stdout } = await promiseExec(`youtube-dl --youtube-skip-dash-manifest -g ${url}`);
         downloadUrls = stdout.split("\n");
-        
+
     } catch (e) {
         console.error(e);
     }
@@ -77,8 +77,7 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
 const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => {
-    await findGameStart(link);
-    console.log(saveFolder);
+    await findGameStart(link, saveFolder);
     // TODO: Find the actual start of the game and change the links to reflect this.
     // TODO: Find the approximate duration of the game.
     // TODO: Get the youtube-dl -g download link.
@@ -87,11 +86,10 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 };
 
 // Return the exact timestamp of when the game started in the VOD.
-const findGameStart = async (link: VodLink): Promise<void> => {
-    console.log(link);
+const findGameStart = async (link: VodLink, saveFolder: string): Promise<void> => {
+    console.log(saveFolder);
     try {
-        const { stdout } = await promiseExec(`youtube-dl -g ${link.url}`);
-        console.log('stdout:', stdout);
+        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 frame.jpg`);
     } catch (e) {
         console.error(e);
     }
