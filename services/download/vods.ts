@@ -11,9 +11,9 @@ import exec from 'child_process';
 const promiseExec = util.promisify(exec.exec);
 
 interface VodLink {
-    providor: "Twitch" | "Youtube"
+    provider: "Twitch" | "Youtube"
     url: string
-    vodStart: string
+    vodStart: number
 }
 
 const downloadVods = (match: FullMatch): void => {
@@ -27,17 +27,34 @@ const downloadVods = (match: FullMatch): void => {
 
 const getVodLinks = (match: FullMatch): VodLink[] => {
     const gameCount = match.maps.filter(map => map.statsId).length;
-    const vodLinks: string[] = [];
+    const vodLinks: VodLink[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-
-            vodLinks.push(link);
+            vodLinks.push(parseLink(link));
         }
     }
     return vodLinks;
+};
+
+// Parse a link for a vod to extract the provider, url and start time.
+const parseLink = (link: string): VodLink => {
+    const split_link = link.split("&");
+    const provider = link.includes("twitch") ? "Twitch" : "Youtube";
+    let url = "";
+    let vodStart = 0;
+
+    if (provider === "Twitch") {
+        url = split_link[0];
+        const timeStamp = split_link[2].slice(2).replace("h", ":").replace("m", ":").replace("s", "").split(":");
+        vodStart = (+timeStamp[0]) * 60 * 60 + (+timeStamp[1]) * 60 + (+timeStamp[2]);
+    } else {
+        url = split_link[0].split("?")[0];
+        vodStart = parseInt(split_link[1].slice(6));
+    }
+    return { provider: provider, url: url, vodStart: vodStart};
 };
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
@@ -79,4 +96,4 @@ const getRoundTime = (framePath: string) => {
     });
 };
 
-export { findGameStart, downloadVods };
+export { downloadVods };
