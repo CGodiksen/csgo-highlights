@@ -6,6 +6,7 @@
 // TODO: The vods should be faily precise so they start exactly at 00:20 or 00:00 on round 1.
 import axios from 'axios';
 import fs from "fs";
+import extract from 'extract-zip';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
@@ -13,7 +14,14 @@ import { Demo } from 'hltv/lib/models/Demo';
 const downloadDemo = (match: FullMatch): void => {
     const saveFolder = `./data/${match.id}/`;
 
-    void downloadDemoZip(match.demos, saveFolder).then(zipFile => { console.log(zipFile); });
+    void downloadDemoZip(match.demos, saveFolder)
+        .then(zipFile => {
+            // Extracting the demos in the zip file and deleting it after.
+            void extract(zipFile, { dir: saveFolder })
+                .then(() => {
+                    fs.unlinkSync(zipFile);
+                });
+        });
 };
 
 const downloadDemoZip = (demos: Demo[], saveFolder: string): Promise<string> => new Promise(resolve => {
