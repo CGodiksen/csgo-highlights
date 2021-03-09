@@ -8,6 +8,7 @@ import { MapResult } from 'hltv/lib/models/MapResult';
 const promiseExec = util.promisify(exec.exec);
 
 interface Vod {
+    game: number
     map: MapResult
     provider: "Twitch" | "Youtube"
     url: string
@@ -19,6 +20,7 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     const saveFolder = `data/${match.id}/vods/`;
     const vods = await getVods(match);
 
+    // Maybe use promise all to download the vods concurrently.
     vods.forEach(link => {
         void downloadVod(link, saveFolder);
     });
@@ -32,14 +34,14 @@ const getVods = async (match: FullMatch): Promise<Vod[]> => {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-            vods.push(await parseLink(link, match.maps[i - 1]));
+            vods.push(await parseLink(link, match.maps[i - 1], i));
         }
     }
     return vods;
 };
 
 // Parse a link for a vod to extract the provider, url, start time and download urls.
-const parseLink = async (link: string, map: MapResult): Promise<Vod> => {
+const parseLink = async (link: string, map: MapResult, game: number): Promise<Vod> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
     let url = "";
@@ -56,7 +58,7 @@ const parseLink = async (link: string, map: MapResult): Promise<Vod> => {
         vodStart = parseInt(split_link[1].slice(6));
     }
 
-    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url), map: map };
+    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url), map: map, game: game};
 };
 
 // Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
@@ -75,10 +77,10 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 // Return a promise to deliver the save path after downloading the vod from the given link.
 const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
     await calibrateVodStart(vod, saveFolder);
-    const approx_duration = approximateMapDuration(vod.map);
-    console.log(approx_duration);
+    const approxDuration = approximateMapDuration(vod.map);
+    
+    const savePath = 
 
-    // TODO: Find the approximate duration of the game.
     // TODO: Use ffmpeg to download the video from the above link with the above duration.
     // TODO: Return the save path when the download is done.
 };
