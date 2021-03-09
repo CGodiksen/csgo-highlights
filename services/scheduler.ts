@@ -4,6 +4,10 @@ import { UpcomingMatch } from 'hltv/lib/models/UpcomingMatch';
 
 // Start the different jobs and runs them according to the given interval.
 const startScheduler = (addUpcomingInterval: number, checkIfDoneInterval: number, dayLookahead: number): void => {
+    console.log("Started scheduler:");
+    console.log(`Checking upcoming matches every ${addUpcomingInterval} minutes with a ${dayLookahead} day lookahead`);
+    console.log(`Checking if any upcoming matches are done every ${checkIfDoneInterval} minutes`);
+    
     addUpcomingMatches(dayLookahead);
     
     setInterval(addUpcomingMatches.bind(null, dayLookahead), addUpcomingInterval * 60000);
