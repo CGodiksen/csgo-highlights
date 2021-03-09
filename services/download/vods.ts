@@ -20,7 +20,9 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     const saveFolder = `data/${match.id}/vods/`;
     const vods = await getVodInfo(match);
 
-    // Maybe use promise all to download the vods concurrently.
+    // Downloading each vod concurrently.
+    Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
+
     vods.forEach(link => {
         void downloadVod(link, saveFolder);
     });
@@ -82,7 +84,7 @@ const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> 
 
         const approxDuration = approximateMapDuration(vodInfo.map);
         const savePath = `${saveFolder}${vodInfo.game}.mp4`;
-        
+
         if (vodInfo.provider == "Twitch") {
             await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c ${savePath}`);
         } else {
@@ -141,7 +143,7 @@ const approximateMapDuration = (map: MapResult): number => {
     const roundCount = map.result?.slice(0, 5).trim().split(":").reduce((acc, current) => acc + (+current), 0);
 
     // A long round (with buy time) takes around 150 seconds. Adding 5 minutes for the halftime break.
-    return roundCount ? 10 : 5000;
+    return roundCount ? (roundCount * 150) + 300 : 5000;
 };
 
 export { getRoundTime, downloadVods };
