@@ -1,8 +1,12 @@
 import axios from 'axios';
 import fse from "fs-extra";
-import exec from 'child_process';
+
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
+
+import util from 'util';
+import exec from 'child_process';
+const promiseExec = util.promisify(exec.exec);
 
 // Return the folder containing the downloaded demo files when done downloading and extracting.
 const downloadDemos = async (match: FullMatch): Promise<string> => {
@@ -13,7 +17,7 @@ const downloadDemos = async (match: FullMatch): Promise<string> => {
         const rarFile = await downloadDemoRar(match.demos, saveFolder);
 
         // Extracting the dem files from the downloaded rar and deleting it after.
-        exec.execSync(`unrar e ${rarFile} ${saveFolder}`);
+        await promiseExec(`unrar e ${rarFile} ${saveFolder}`);
         fse.unlinkSync(rarFile);
     }
     catch (downloadDemoError) {
