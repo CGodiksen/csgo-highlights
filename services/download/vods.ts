@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import sharp from 'sharp';
 import vision from '@google-cloud/vision';
 import { FullMatch } from 'hltv/lib/models/FullMatch';
@@ -33,8 +29,11 @@ const getVods = async (match: FullMatch): Promise<Vod[]> => {
     const vods: Vod[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
-        const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))!.link;
-        vods.push(await parseLink(link, match.maps[i - 1]));
+        const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
+
+        if (link) {
+            vods.push(await parseLink(link, match.maps[i - 1]));
+        }
     }
     return vods;
 };
@@ -76,8 +75,9 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 // Return a promise to deliver the save path after downloading the vod from the given link.
 const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
     await calibrateVodStart(vod, saveFolder);
-    console.log(vod);
-    
+    const approx_duration = approximateMapDuration(vod.map);
+    console.log(approx_duration);
+
     // TODO: Find the approximate duration of the game.
     // TODO: Use ffmpeg to download the video from the above link with the above duration.
     // TODO: Return the save path when the download is done.
@@ -108,7 +108,7 @@ const calibrateVodStart = async (vod: Vod, saveFolder: string): Promise<void> =>
 // Return the time left in the round in seconds on a specific frame of the VOD. 
 const getRoundTime = async (framePath: string): Promise<number | void> => {
     // Creates a client
-    const client = new vision.ImageAnnotatorClient({keyFilename: "config/gcp_ocr.json"});
+    const client = new vision.ImageAnnotatorClient({ keyFilename: "config/gcp_ocr.json" });
 
     // Performs text detection on the local file
     const result = await client.textDetection(framePath);
@@ -126,12 +126,12 @@ const getRoundTime = async (framePath: string): Promise<number | void> => {
 };
 
 // Return the approximate duration of the game based on the number of rounds.
-const calculateApproxDuration = (map: MapResult): number => {
+const approximateMapDuration = (map: MapResult): number => {
     // Example map result: 16:10.
-    const roundCount = map.result!.slice(0, 5).trim().split(":").reduce((acc, current) => acc + (+current), 0);
+    const roundCount = map.result?.slice(0, 5).trim().split(":").reduce((acc, current) => acc + (+current), 0);
 
     // A long round (with buy time) takes around 150 seconds. Adding 5 minutes for the halftime break.
-    return (roundCount * 150) + 300;
+    return roundCount ? (roundCount * 150) + 300 : 5000;
 };
 
 export { getRoundTime, downloadVods };
