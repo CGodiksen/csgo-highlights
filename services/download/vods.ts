@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -32,16 +33,13 @@ const getVods = async (match: FullMatch): Promise<Vod[]> => {
     const vods: Vod[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
-        const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
-
-        if (link) {
-            vods.push(await parseLink(link, match.maps[i - 1]));
-        }
+        const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))!.link;
+        vods.push(await parseLink(link, match.maps[i - 1]));
     }
     return vods;
 };
 
-// Parse a link for a vod to extract the provider, url and start time.
+// Parse a link for a vod to extract the provider, url, start time and download urls.
 const parseLink = async (link: string, map: MapResult): Promise<Vod> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
@@ -128,6 +126,12 @@ const getRoundTime = async (framePath: string): Promise<number | void> => {
 };
 
 // Return the approximate duration of the game based on the number of rounds.
-// const calculateApproxDuration = ()
+const calculateApproxDuration = (map: MapResult): number => {
+    // Example map result: 16:10.
+    const roundCount = map.result!.slice(0, 5).trim().split(":").reduce((acc, current) => acc + (+current), 0);
+
+    // A long round (with buy time) takes around 150 seconds. Adding 5 minutes for the halftime break.
+    return (roundCount * 150) + 300;
+};
 
 export { getRoundTime, downloadVods };
