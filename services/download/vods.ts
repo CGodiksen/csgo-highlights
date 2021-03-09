@@ -7,10 +7,11 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 
 import util from 'util';
 import exec from 'child_process';
+import { MapResult } from 'hltv/lib/models/MapResult';
 const promiseExec = util.promisify(exec.exec);
 
-interface VodLink {
-    game: number
+interface Vod {
+    map: MapResult
     provider: "Twitch" | "Youtube"
     url: string
     vodStart: number
@@ -19,29 +20,29 @@ interface VodLink {
 
 const downloadVods = async (match: FullMatch): Promise<void> => {
     const saveFolder = `data/${match.id}/vods/`;
-    const vodLinks = await getVodLinks(match);
+    const vods = await getVods(match);
 
-    vodLinks.forEach(link => {
+    vods.forEach(link => {
         void downloadVod(link, saveFolder);
     });
 };
 
-const getVodLinks = async (match: FullMatch): Promise<VodLink[]> => {
+const getVods = async (match: FullMatch): Promise<Vod[]> => {
     const gameCount = match.maps.filter(map => map.statsId).length;
-    const vodLinks: VodLink[] = [];
+    const vods: Vod[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-            vodLinks.push(await parseLink(link, i));
+            vods.push(await parseLink(link, i));
         }
     }
-    return vodLinks;
+    return vods;
 };
 
 // Parse a link for a vod to extract the provider, url and start time.
-const parseLink = async (link: string, game: number): Promise<VodLink> => {
+const parseLink = async (link: string, game: number): Promise<Vod> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
     let url = "";
@@ -75,8 +76,8 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 };
 
 // Return a promise to deliver the save path after downloading the vod from the given link.
-const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => {
-    await calibrateVodStart(link, saveFolder);
+const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
+    await calibrateVodStart(vod, saveFolder);
     
     // TODO: Find the approximate duration of the game.
     // TODO: Use ffmpeg to download the video from the above link with the above duration.
@@ -84,21 +85,21 @@ const downloadVod = async (link: VodLink, saveFolder: string): Promise<void> => 
 };
 
 // Find the actual start of the game and change the link to reflect this.
-const calibrateVodStart = async (link: VodLink, saveFolder: string): Promise<void> => {
+const calibrateVodStart = async (vod: Vod, saveFolder: string): Promise<void> => {
     try {
         // Downloading a single frame from the VOD.
-        const fileName = `${saveFolder}${link.game}.jpg`;
-        await promiseExec(`ffmpeg -ss ${link.vodStart} -i "${link.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
+        const fileName = `${saveFolder}${vod.game}.jpg`;
+        await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
 
         // Cropping the downloaded frame to focus it on the scoreboard and the timer.
-        const croppedFileName = `${saveFolder}${link.game}_cropped.jpg`;
+        const croppedFileName = `${saveFolder}${vod.game}_cropped.jpg`;
         await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
 
         const timeLeftOnFrame = await getRoundTime(croppedFileName);
 
         if (timeLeftOnFrame) {
             // Adjusting the start time based on the time left in the round on the first frame.
-            link.vodStart = link.vodStart - (135 - timeLeftOnFrame);
+            vod.vodStart = vod.vodStart - (135 - timeLeftOnFrame);
         }
     } catch (e) {
         console.error(e);
@@ -124,5 +125,8 @@ const getRoundTime = async (framePath: string): Promise<number | void> => {
         }
     }
 };
+
+// Return the approximate duration of the game based on the number of rounds.
+const calculateApproxDuration = ()
 
 export { getRoundTime, downloadVods };
