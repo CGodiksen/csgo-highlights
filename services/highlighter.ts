@@ -1,7 +1,7 @@
 // TODO: Remove irrelevant rounds (eco-rounds)
 import fs from "fs";
 import demofile = require("demofile");
-import { Moment, Highlight } from "./types";
+import { Moment, Highlight } from "./common/types";
 
 interface Round {
     id: number
