@@ -5,8 +5,9 @@ import { getHighlightSpecification } from "./highlighter";
 const processMatch = async (matchId: number): Promise<void> => {
     console.log(matchId);
 
-    const demoFiles = fs.readdirSync("data/2346587/demos");
-    const hightlightSpecifications = await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFile)));
+    const demoFolder = "data/2346587/demos/";
+    const demoFiles = fs.readdirSync(demoFolder);
+    const hightlightSpecifications = await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
     console.log(hightlightSpecifications);
     
     // TODO: Download the demos in parallel with downloading the VODs.

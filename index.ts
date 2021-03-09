@@ -6,16 +6,20 @@
 // startScheduler(1440, 15, 2);
 // void getHighlights("data/demos/gambit-vs-virtus-pro-m1-vertigo.dem").then(highlights => console.log(highlights));
 
+
 // import { downloadDemos } from "./services/download/demos";
 // import HLTV from 'hltv';
 // void HLTV.getMatch({ id: 2306295 }).then(res => {
-//     downloadDemos(res)
-//         .then(demoFolder => console.log(demoFolder))
-//         .catch(e => console.log(e));
-// });
-
-import { downloadVods } from "./services/download/vods";
-import HLTV from 'hltv';
-void HLTV.getMatch({ id: 2346587 }).then(res => {
-    void downloadVods(res);
-});
+    //     downloadDemos(res)
+    //         .then(demoFolder => console.log(demoFolder))
+    //         .catch(e => console.log(e));
+    // });
+    
+    // import { downloadVods } from "./services/download/vods";
+    // import HLTV from 'hltv';
+    // void HLTV.getMatch({ id: 2346587 }).then(res => {
+        //     void downloadVods(res);
+        // });
+        
+import { processMatch } from "./services/processor";
+void processMatch(2346587);

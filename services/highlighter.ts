@@ -14,10 +14,10 @@ interface HighlightSpecification {
 }
 
 // Return a highlight specification that describes the segments that should be included in a highlight video of the given demo.
-const getHighlightSpecification = (demoFilePath: string): Promise<HighlightSpecification> => new Promise(resolve => {
-    console.log(`Creating a highlight specification for the demo at ${demoFilePath}...`);
+const getHighlightSpecification = (demoFolder: string, demoFile: string): Promise<HighlightSpecification> => new Promise(resolve => {
+    console.log(`Creating a highlight specification for the demo at ${demoFile}...`);
 
-    const demo = fs.readFileSync(demoFilePath);
+    const demo = fs.readFileSync(`${demoFolder}${demoFile}`);
     extractMoments(demo).then(moments => {
         const highlights: Highlight[] = [];
         const rounds = splitIntoRounds(moments);
@@ -46,8 +46,8 @@ const getHighlightSpecification = (demoFilePath: string): Promise<HighlightSpeci
             }
         });
 
-        console.log(`Created a highlight specification with ${highlights.length} highlights from the demo at ${demoFilePath}`);
-        resolve({ demoFile: demoFilePath, highlights: highlights});
+        console.log(`Created a highlight specification with ${highlights.length} highlights from the demo at ${demoFile}`);
+        resolve({ demoFile: demoFile, highlights: highlights});
     })
     .catch(e => console.log(e));
 });
