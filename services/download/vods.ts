@@ -35,7 +35,7 @@ const getVods = async (match: FullMatch): Promise<Vod[]> => {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
 
         if (link) {
-            vods.push(await parseLink(link, match.maps[i]));
+            vods.push(await parseLink(link, match.maps[i - 1]));
         }
     }
     return vods;
@@ -110,7 +110,7 @@ const calibrateVodStart = async (vod: Vod, saveFolder: string): Promise<void> =>
 // Return the time left in the round in seconds on a specific frame of the VOD. 
 const getRoundTime = async (framePath: string): Promise<number | void> => {
     // Creates a client
-    const client = new vision.ImageAnnotatorClient();
+    const client = new vision.ImageAnnotatorClient({keyFilename: "config/gcp_ocr.json"});
 
     // Performs text detection on the local file
     const result = await client.textDetection(framePath);
