@@ -7,7 +7,7 @@ interface Highlight {
     roundNumber: number
     moments: Moment[]
     start: number
-    end: number
+    duration: number
 }
 
 interface HighlightSpecification {

@@ -37,7 +37,7 @@ const getHighlightSpecification = (demoFolder: string, demoFile: string): Promis
                 const start = withoutStart[0].time - 5;
                 const end = withoutStart.slice(-1)[0].time + 5;
 
-                highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, end: end });
+                highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, duration: end - start });
             }
         });
 
