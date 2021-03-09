@@ -1,10 +1,10 @@
-import util from 'util';
 import sharp from 'sharp';
 import vision from '@google-cloud/vision';
 
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { MapResult } from 'hltv/lib/models/MapResult';
 
+import util from 'util';
 import exec from 'child_process';
 const promiseExec = util.promisify(exec.exec);
 
