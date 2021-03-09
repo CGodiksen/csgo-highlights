@@ -8,8 +8,13 @@ interface Round {
     moments: Moment[]
 }
 
-// Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
-const getHighlights = (demoFilePath: string): Promise<Highlight[]> => new Promise(resolve => {
+interface HighlightSpecification {
+    demoFile: string
+    highlights: Highlight[] 
+}
+
+// Return a highlight specification that describes the segments that should be included in a highlight video of the given demo.
+const getHighlightSpecification = (demoFilePath: string): Promise<HighlightSpecification> => new Promise(resolve => {
     console.log(`Creating a highlight specification for the demo at ${demoFilePath}...`);
 
     const demo = fs.readFileSync(demoFilePath);
@@ -42,7 +47,7 @@ const getHighlights = (demoFilePath: string): Promise<Highlight[]> => new Promis
         });
 
         console.log(`Created a highlight specification with ${highlights.length} highlights from the demo at ${demoFilePath}`);
-        resolve(highlights);
+        resolve({ demoFile: demoFilePath, highlights: highlights});
     })
     .catch(e => console.log(e));
 });
@@ -113,4 +118,4 @@ const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
     demoFile.parse(demo);
 });
 
-export { getHighlights, getDuration };
+export { getHighlightSpecification, getDuration };
