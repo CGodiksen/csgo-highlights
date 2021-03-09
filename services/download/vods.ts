@@ -83,7 +83,7 @@ const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> 
         const savePath = `${saveFolder}${vodInfo.game}.mp4`;
 
         if (vodInfo.provider == "Twitch") {
-            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c ${savePath}`);
+            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c copy ${savePath}`);
         } else {
             await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
         }
@@ -95,6 +95,9 @@ const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> 
 // Find the actual start of the game and change the link to reflect this.
 const calibrateVodStart = async (vodInfo: VodInfo, saveFolder: string): Promise<void> => {
     try {
+        // Adding 20 seconds to the vodstart to ensure that the timer is visible on the first frame.
+        vodInfo.vodStart += 20;
+
         // Downloading a single frame from the VOD.
         const fileName = `${saveFolder}${vodInfo.map.name}.jpg`;
         await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
