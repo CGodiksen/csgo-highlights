@@ -1,10 +1,11 @@
+import util from 'util';
 import sharp from 'sharp';
 import vision from '@google-cloud/vision';
-import { FullMatch } from 'hltv/lib/models/FullMatch';
 
-import util from 'util';
-import exec from 'child_process';
+import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { MapResult } from 'hltv/lib/models/MapResult';
+
+import exec from 'child_process';
 const promiseExec = util.promisify(exec.exec);
 
 interface VodInfo {
@@ -22,10 +23,6 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
 
     // Downloading each vod concurrently.
     Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
-
-    vods.forEach(link => {
-        void downloadVod(link, saveFolder);
-    });
 };
 
 // Return a list with a VodInfo object for each available Vod in the given match.

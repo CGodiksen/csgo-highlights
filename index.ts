@@ -18,6 +18,6 @@
 
 import { downloadVods } from "./services/download/vods";
 import HLTV from 'hltv';
-void HLTV.getMatch({ id: 2306295 }).then(res => {
+void HLTV.getMatch({ id: 2346587 }).then(res => {
     void downloadVods(res);
 });
