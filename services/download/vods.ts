@@ -25,6 +25,7 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
 
     // Downloading each vod concurrently.
     Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
+
     console.log(`Downloaded ${vods.length} VODs from match ${match.id} to ${saveFolder}`);
 };
 

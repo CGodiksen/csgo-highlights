@@ -1,4 +1,5 @@
 // TODO: Remove irrelevant rounds (eco-rounds)
+import fs from "fs";
 import demofile = require("demofile");
 
 interface moment {
@@ -19,7 +20,10 @@ interface highlight {
 }
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
-const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolve => {
+const getHighlights = (demoFilePath: string): Promise<highlight[]> => new Promise(resolve => {
+    console.log(`Creating a highlight specification for the demo at ${demoFilePath}...`);
+
+    const demo = fs.readFileSync(demoFilePath);
     extractMoments(demo).then(moments => {
         const highlights: highlight[] = [];
         const rounds = splitIntoRounds(moments);
@@ -48,6 +52,7 @@ const getHighlights = (demo: Buffer): Promise<highlight[]> => new Promise(resolv
             }
         });
 
+        console.log(`Created a highlight specification with ${highlights.length} highlights from the demo at ${demoFilePath}`);
         resolve(highlights);
     })
     .catch(e => console.log(e));
