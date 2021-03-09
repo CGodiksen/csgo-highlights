@@ -1,4 +1,5 @@
 import fs from "fs";
+import { createHighlightVideo } from "./editor";
 import { getHighlightSpecification } from "./highlighter";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
@@ -12,7 +13,8 @@ const processMatch = async (matchId: number): Promise<void> => {
     console.log(hightlightSpecifications);
     
     const vodFolder = "data/2346587/vods";
-    
+    const hightlightVideoPath = createHighlightVideo(vodFolder, hightlightSpecifications);
+    console.log(hightlightVideoPath);
 
     // TODO: Download the demos in parallel with downloading the VODs.
     // TODO: Downloading the demos should be grouped with a function that immediately sends them along to the getHightlights function.
