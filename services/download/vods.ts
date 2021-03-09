@@ -84,7 +84,7 @@ const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> 
         await calibrateVodStart(vodInfo, saveFolder);
 
         const approxDuration = approximateMapDuration(vodInfo.map);
-        const savePath = `${saveFolder}${vodInfo.game}.mp4`;
+        const savePath = `${saveFolder}m${vodInfo.game}.mp4`;
 
         if (vodInfo.provider == "Twitch") {
             await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c copy ${savePath}`);

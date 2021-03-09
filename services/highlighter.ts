@@ -1,16 +1,11 @@
 // TODO: Remove irrelevant rounds (eco-rounds)
 import fs from "fs";
 import demofile = require("demofile");
-import { Moment, Highlight } from "./common/types";
+import { Moment, Highlight, HighlightSpecification } from "./common/types";
 
 interface Round {
     id: number
     moments: Moment[]
-}
-
-interface HighlightSpecification {
-    demoFile: string
-    highlights: Highlight[] 
 }
 
 // Return a highlight specification that describes the segments that should be included in a highlight video of the given demo.

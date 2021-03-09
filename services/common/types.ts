@@ -10,4 +10,9 @@ interface Highlight {
     end: number
 }
 
-export { Moment, Highlight };
+interface HighlightSpecification {
+    demoFile: string
+    highlights: Highlight[] 
+}
+
+export { Moment, Highlight, HighlightSpecification };
