@@ -58,7 +58,7 @@ const parseLink = async (link: string, map: MapResult, game: number): Promise<Vo
         vodStart = parseInt(split_link[1].slice(6));
     }
 
-    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url), map: map, game: game};
+    return { provider: provider, url: url, vodStart: vodStart, downloadUrls: await getDownloadUrls(url), map: map, game: game };
 };
 
 // Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
@@ -74,15 +74,22 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
     return downloadUrls;
 };
 
-// Return a promise to deliver the save path after downloading the vod from the given link.
+// Return a promise to download the vod from the given link.
 const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
-    await calibrateVodStart(vod, saveFolder);
-    const approxDuration = approximateMapDuration(vod.map);
-    
-    const savePath = 
+    try {
+        await calibrateVodStart(vod, saveFolder);
 
-    // TODO: Use ffmpeg to download the video from the above link with the above duration.
-    // TODO: Return the save path when the download is done.
+        const approxDuration = approximateMapDuration(vod.map);
+        const savePath = `${saveFolder}${vod.game}.mp4`;
+        
+        if (vod.provider == "Twitch") {
+            await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -to ${approxDuration} -c ${savePath}`);
+        } else {
+            await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -ss ${vod.vodStart} -i "${vod.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
+        }
+    } catch (e) {
+        console.error(e);
+    }
 };
 
 // Find the actual start of the game and change the link to reflect this.
@@ -133,7 +140,7 @@ const approximateMapDuration = (map: MapResult): number => {
     const roundCount = map.result?.slice(0, 5).trim().split(":").reduce((acc, current) => acc + (+current), 0);
 
     // A long round (with buy time) takes around 150 seconds. Adding 5 minutes for the halftime break.
-    return roundCount ? (roundCount * 150) + 300 : 5000;
+    return roundCount ? 10 : 5000;
 };
 
 export { getRoundTime, downloadVods };
