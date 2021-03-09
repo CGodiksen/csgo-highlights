@@ -7,7 +7,7 @@ import exec from 'child_process';
 import { MapResult } from 'hltv/lib/models/MapResult';
 const promiseExec = util.promisify(exec.exec);
 
-interface Vod {
+interface VodInfo {
     game: number
     map: MapResult
     provider: "Twitch" | "Youtube"
@@ -18,7 +18,7 @@ interface Vod {
 
 const downloadVods = async (match: FullMatch): Promise<void> => {
     const saveFolder = `data/${match.id}/vods/`;
-    const vods = await getVods(match);
+    const vods = await getVodInfo(match);
 
     // Maybe use promise all to download the vods concurrently.
     vods.forEach(link => {
@@ -26,9 +26,10 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     });
 };
 
-const getVods = async (match: FullMatch): Promise<Vod[]> => {
+// Return a list with a VodInfo object for each available Vod in the given match.
+const getVodInfo = async (match: FullMatch): Promise<VodInfo[]> => {
     const gameCount = match.maps.filter(map => map.statsId).length;
-    const vods: Vod[] = [];
+    const vods: VodInfo[] = [];
 
     for (let i = 1; i <= gameCount; i++) {
         const link = match.demos.find(demo => demo.name.includes(`Map ${i}`))?.link;
@@ -41,7 +42,7 @@ const getVods = async (match: FullMatch): Promise<Vod[]> => {
 };
 
 // Parse a link for a vod to extract the provider, url, start time and download urls.
-const parseLink = async (link: string, map: MapResult, game: number): Promise<Vod> => {
+const parseLink = async (link: string, map: MapResult, game: number): Promise<VodInfo> => {
     const split_link = link.split("&");
     const provider = link.includes("twitch") ? "Twitch" : "Youtube";
     let url = "";
@@ -75,17 +76,17 @@ const getDownloadUrls = async (url: string): Promise<string[]> => {
 };
 
 // Return a promise to download the vod from the given link.
-const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
+const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> => {
     try {
-        await calibrateVodStart(vod, saveFolder);
+        await calibrateVodStart(vodInfo, saveFolder);
 
-        const approxDuration = approximateMapDuration(vod.map);
-        const savePath = `${saveFolder}${vod.game}.mp4`;
+        const approxDuration = approximateMapDuration(vodInfo.map);
+        const savePath = `${saveFolder}${vodInfo.game}.mp4`;
         
-        if (vod.provider == "Twitch") {
-            await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -to ${approxDuration} -c ${savePath}`);
+        if (vodInfo.provider == "Twitch") {
+            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c ${savePath}`);
         } else {
-            await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -ss ${vod.vodStart} -i "${vod.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
+            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
         }
     } catch (e) {
         console.error(e);
@@ -93,21 +94,21 @@ const downloadVod = async (vod: Vod, saveFolder: string): Promise<void> => {
 };
 
 // Find the actual start of the game and change the link to reflect this.
-const calibrateVodStart = async (vod: Vod, saveFolder: string): Promise<void> => {
+const calibrateVodStart = async (vodInfo: VodInfo, saveFolder: string): Promise<void> => {
     try {
         // Downloading a single frame from the VOD.
-        const fileName = `${saveFolder}${vod.map.name}.jpg`;
-        await promiseExec(`ffmpeg -ss ${vod.vodStart} -i "${vod.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
+        const fileName = `${saveFolder}${vodInfo.map.name}.jpg`;
+        await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
 
         // Cropping the downloaded frame to focus it on the scoreboard and the timer.
-        const croppedFileName = `${saveFolder}${vod.map.name}_cropped.jpg`;
+        const croppedFileName = `${saveFolder}${vodInfo.map.name}_cropped.jpg`;
         await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
 
         const timeLeftOnFrame = await getRoundTime(croppedFileName);
 
         if (timeLeftOnFrame) {
             // Adjusting the start time based on the time left in the round on the first frame.
-            vod.vodStart = vod.vodStart - (135 - timeLeftOnFrame);
+            vodInfo.vodStart = vodInfo.vodStart - (135 - timeLeftOnFrame);
         }
     } catch (e) {
         console.error(e);
