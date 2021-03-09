@@ -2,34 +2,34 @@
 import fs from "fs";
 import demofile = require("demofile");
 
-interface moment {
+interface Moment {
     event: string
     time: number
 }
 
-interface round {
+interface Round {
     id: number
-    moments: moment[]
+    moments: Moment[]
 }
 
-interface highlight {
+interface Highlight {
     roundNumber: number
-    moments: moment[]
+    moments: Moment[]
     start: number
     end: number
 }
 
 // Return a list of highlights that describe the segments that should be included in a highlight video of the given demo.
-const getHighlights = (demoFilePath: string): Promise<highlight[]> => new Promise(resolve => {
+const getHighlights = (demoFilePath: string): Promise<Highlight[]> => new Promise(resolve => {
     console.log(`Creating a highlight specification for the demo at ${demoFilePath}...`);
 
     const demo = fs.readFileSync(demoFilePath);
     extractMoments(demo).then(moments => {
-        const highlights: highlight[] = [];
+        const highlights: Highlight[] = [];
         const rounds = splitIntoRounds(moments);
 
         rounds.forEach(round => {
-            const withoutStart: moment[] = round.moments.filter(moment => moment.event !== "round_start");
+            const withoutStart: Moment[] = round.moments.filter(moment => moment.event !== "round_start");
 
             // Only adding a highlight if there is more than two events (more than bomb plant and bomb explosion).
             if (withoutStart.length > 2) {
@@ -58,8 +58,8 @@ const getHighlights = (demoFilePath: string): Promise<highlight[]> => new Promis
     .catch(e => console.log(e));
 });
 
-const extractMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve => {
-    const moments: moment[] = [];
+const extractMoments = (demo: Buffer): Promise<Moment[]> => new Promise(resolve => {
+    const moments: Moment[] = [];
 
     const demoFile = new demofile.DemoFile();
 
@@ -94,10 +94,10 @@ const extractMoments = (demo: Buffer): Promise<moment[]> => new Promise(resolve 
     demoFile.parse(demo);
 });
 
-const splitIntoRounds = (moments: moment[]): round[] => {
-    let round: round = { id: 1, moments: [] };
+const splitIntoRounds = (moments: Moment[]): Round[] => {
+    let round: Round = { id: 1, moments: [] };
     let roundCounter = 0;
-    const rounds: round[] = [];
+    const rounds: Round[] = [];
 
     moments.forEach(moment => {
         if (moment.event === "round_end") {
