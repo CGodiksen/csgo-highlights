@@ -10,7 +10,7 @@ const promiseExec = util.promisify(exec.exec);
 
 // Return the folder containing the downloaded demo files when done downloading and extracting.
 const downloadDemos = async (match: FullMatch): Promise<string> => {
-    console.log(`Downloading demos from ${match.id}...`);
+    console.log(`Downloading demos from match ${match.id}...`);
     const saveFolder = `data/${match.id}/demos/`;
 
     try {
@@ -23,7 +23,7 @@ const downloadDemos = async (match: FullMatch): Promise<string> => {
     catch (downloadDemoError) {
         console.error(downloadDemoError);
     }
-    console.log(`Downloaded demos from ${match.id} to ${saveFolder}`);
+    console.log(`Downloaded demos from match ${match.id} to ${saveFolder}`);
     return saveFolder;
 };
 

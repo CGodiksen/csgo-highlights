@@ -18,11 +18,14 @@ interface VodInfo {
 }
 
 const downloadVods = async (match: FullMatch): Promise<void> => {
+    console.log(`Downloading VODs from match ${match.id}...`);
+    
     const saveFolder = `data/${match.id}/vods/`;
     const vods = await getVodInfo(match);
 
     // Downloading each vod concurrently.
     Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
+    console.log(`Downloaded ${vods.length} VODs from match ${match.id} to ${saveFolder}`);
 };
 
 // Return a list with a VodInfo object for each available Vod in the given match.
@@ -87,6 +90,7 @@ const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> 
         } else {
             await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
         }
+        console.log(`Downloaded VOD of game ${vodInfo.game} on ${vodInfo.map.name} to ${savePath}`);
     } catch (e) {
         console.error(e);
     }
