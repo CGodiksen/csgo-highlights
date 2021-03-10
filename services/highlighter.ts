@@ -14,11 +14,11 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
 
     const demo = fs.readFileSync(`${demoFolder}${demoFile}`);
     const moments = await extractMoments(demo);
+    calibrateMomentTimes(moments);
 
     const highlights: Highlight[] = [];
     console.log(moments);
     const rounds = splitIntoRounds(moments);
-    console.log(rounds);
     
     rounds.forEach(round => {
         const withoutStart: Moment[] = round.moments.filter(moment => moment.event !== "round_start");
@@ -73,6 +73,13 @@ const extractMoments = (demo: Buffer): Promise<Moment[]> => new Promise(resolve 
 
     demoFile.parse(demo);
 });
+
+// Calibrate the time of the moments so the first round start happens at 0 seconds.
+const calibrateMomentTimes = (moments: Moment[]): void => {
+    const firstRoundStartTime = moments.find(moment => moment.event === "round_start")!.time;
+
+    moments.forEach(moment => moment.time -= firstRoundStartTime);
+};
 
 const splitIntoRounds = (moments: Moment[]): Round[] => {
     let roundCounter = 1;
