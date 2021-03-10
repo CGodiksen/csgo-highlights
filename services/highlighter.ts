@@ -86,8 +86,8 @@ const extractMoments = (demo: Buffer): Promise<Moment[]> => new Promise(resolve 
 });
 
 const splitIntoRounds = (moments: Moment[]): Round[] => {
-    let round: Round = { id: 1, moments: [] };
-    let roundCounter = 0;
+    let roundCounter = 1;
+    let round: Round = { id: roundCounter, moments: [] };
     const rounds: Round[] = [];
 
     moments.forEach(moment => {
