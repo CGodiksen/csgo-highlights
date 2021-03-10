@@ -1,19 +1,23 @@
 import fs from "fs/promises";
+import path from "path";
 import { HighlightSpecification } from "./common/types";
 import { promiseExec } from "./common/functions";
 
 // Cut the given VODs into a highlight video according to the given hightlight specification.
-const createHighlightVideo = async (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): Promise<void> => {
+const createHighlightVideo = async (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): Promise<string> => {
     console.log(`Creating a hightlight video for VODs in ${vodFolder}...`);
 
     const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(vodFolder, spec)));
 
     // Merge the text files specifying the order of the clips into a single hightlight txt file.
-    const mergedOrderFile = await mergeOrderFiles(vodFolder, highlightOrderFiles);
-    console.log(mergedOrderFile);
+    const mergedOrderFilePath = await mergeOrderFiles(vodFolder, highlightOrderFiles);
 
     // Use the ffmpeg concat demuxer method to concatenate all hightlight clips into a single hightlight video.
-    // Return the path to the created hightlight video.
+    const absolutePath = `${path.dirname(require.main!.filename)}\\${mergedOrderFilePath.replace(/\//g, "\\")}`;
+    await promiseExec(`ffmpeg -safe 0 -f concat -i ${absolutePath} -c copy ${vodFolder}highlights.mp4`);
+    
+    console.log(`Created a highlight video from ${hightlightSpecifications.length} VODs at ${mergedOrderFilePath}`);
+    return mergedOrderFilePath;
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
@@ -27,7 +31,7 @@ const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification)
         const clipFilePath = `${vodFolder}${mapNumber}_${hightlight.roundNumber}.mp4`;
         await promiseExec(`ffmpeg -ss ${hightlight.start} -i ${hightlightSpec.vodFilePath!} -to ${hightlight.duration} -c copy ${clipFilePath}`);
 
-        await fs.appendFile(`${vodFolder}${mapNumber}.txt`, `${clipFilePath}\n`);
+        await fs.appendFile(`${vodFolder}${mapNumber}.txt`, `file ${clipFilePath}\n`);
     }
 
     return highlightOrderFilePath;
