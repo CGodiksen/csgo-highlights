@@ -3,10 +3,7 @@ import fse from "fs-extra";
 
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
-
-import util from 'util';
-import exec from 'child_process';
-const promiseExec = util.promisify(exec.exec);
+import {promiseExec} from "../common/functions";
 
 // Return the folder containing the downloaded demo files when done downloading and extracting.
 const downloadDemos = async (match: FullMatch): Promise<string> => {
