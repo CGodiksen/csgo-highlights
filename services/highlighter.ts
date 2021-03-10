@@ -19,7 +19,8 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
     const highlights: Highlight[] = [];
     console.log(moments);
     const rounds = splitIntoRounds(moments);
-    
+    console.log(rounds);
+
     rounds.forEach(round => {
         const withoutStart: Moment[] = round.moments.filter(moment => moment.event !== "round_start");
 
@@ -88,11 +89,13 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
 
     moments.forEach(moment => {
         if (moment.event === "round_end") {
+            round.moments.push(moment);
             rounds.push(round);
+            
             roundCounter += 1;
             round = { id: roundCounter, moments: [] };
         } else {
-            round = { id: round.id, moments: round.moments.concat(moment) };
+            round.moments.push(moment);
         }
     });
 
@@ -101,6 +104,9 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
 
 // Removing moments from the given list of moments that would decrease the viewing quality of the highlight.
 const cleanMoments = (moments: Moment[]): void => {
+    // Removing the end of the round if the T's are saving.
+    
+    
     // Removing kills that are seperate from the actual highlight of the round.
     for (let i = 1; i >= 0; i--) {
         if (moments[i].event === "player_death" && (moments[i + 1].time - moments[i].time) > 30) {
@@ -108,7 +114,7 @@ const cleanMoments = (moments: Moment[]): void => {
         }
     }
     
-    // Removing the bomb explosion if the other team is saving and nothing happens between bomb plant and explosion.
+    // Removing the bomb explosion if the CT's are saving and nothing happens between bomb plant and explosion.
     if (moments.slice(-1)[0].event === "bomb_exploded" && moments.slice(-2)[0].event === "bomb_planted") {
         moments.splice(-1, 1);
     }
