@@ -9,11 +9,9 @@ const createHighlightVideo = async (vodFolder: string, hightlightSpecifications:
     const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(vodFolder, spec)));
     console.log(highlightOrderFiles);
     
-    // For each vod do the following concurrently:
-        // Create a highlight txt file.
-        // Cut out hightlights from the vods.
-        // When a hightlight is cut out add its filepath to the hightlight txt file.
-    // Afterwards merge the text files into a single hightlight txt file.
+    // Merge the text files specifying the order of the clips into a single hightlight txt file.
+
+
     // Use the ffmpeg concat demuxer method to concatenate all hightlight clips into a single hightlight video.
     // Return the path to the created hightlight video.
 };
@@ -33,6 +31,15 @@ const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification)
     }
 
     return highlightOrderFilePath;
+};
+
+// Return a promise to deliver the file path to the merged order file when done merging.
+const mergeOrderFiles = async (vodFolder: string, orderFiles: string[]): Promise<string> => {
+    const mergedFilePath = `${vodFolder}merged.txt`
+    const content = await Promise.all(orderFiles.map(orderFile => fs.readFile(orderFile)));
+
+    await fs.writeFile(mergedFilePath, content.toString());
+    return mergedFilePath;
 };
 
 export { createHighlightVideo };
