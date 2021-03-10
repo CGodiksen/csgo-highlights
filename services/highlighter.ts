@@ -25,17 +25,7 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
 
         // Only adding a highlight if there is more than two events (more than bomb plant and bomb explosion).
         if (withoutStart.length > 2) {
-            // Removing kills that are seperate from the actual highlight of the round.
-            for (let i = 1; i >= 0; i--) {
-                if (withoutStart[i].event === "player_death" && (withoutStart[i + 1].time - withoutStart[i].time) > 30) {
-                    withoutStart.splice(i, 1);
-                }
-            }
-            
-            // Removing the bomb explosion if the other team is saving and nothing happens between bomb plant and explosion.
-            if (withoutStart.slice(-1)[0].event === "bomb_exploded" && withoutStart.slice(-2)[0].event === "bomb_planted") {
-                withoutStart.splice(-1, 1);
-            }
+            cleanMoments(withoutStart);
             
             const start = withoutStart[0].time - 5;
             const end = withoutStart.slice(-1)[0].time + 5;
@@ -100,6 +90,23 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
     });
 
     return rounds;
+};
+
+// Removing moments from the given list of moments that would decrease the viewing quality of the highlight.
+const cleanMoments = (moments: Moment[]): Moment[] => {
+    // Removing kills that are seperate from the actual highlight of the round.
+    for (let i = 1; i >= 0; i--) {
+        if (moments[i].event === "player_death" && (moments[i + 1].time - moments[i].time) > 30) {
+            moments.splice(i, 1);
+        }
+    }
+    
+    // Removing the bomb explosion if the other team is saving and nothing happens between bomb plant and explosion.
+    if (moments.slice(-1)[0].event === "bomb_exploded" && moments.slice(-2)[0].event === "bomb_planted") {
+        moments.splice(-1, 1);
+    }
+
+    return moments;
 };
 
 const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
