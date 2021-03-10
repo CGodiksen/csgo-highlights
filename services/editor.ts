@@ -13,11 +13,12 @@ const createHighlightVideo = async (vodFolder: string, hightlightSpecifications:
     const mergedOrderFilePath = await mergeOrderFiles(vodFolder, highlightOrderFiles);
 
     // Use the ffmpeg concat demuxer method to concatenate all hightlight clips into a single hightlight video.
-    const absolutePath = `${path.dirname(require.main!.filename)}\\${mergedOrderFilePath.replace(/\//g, "\\")}`;
-    await promiseExec(`ffmpeg -safe 0 -f concat -i ${absolutePath} -c copy ${vodFolder}highlights.mp4`);
+    const orderFileAbsolutePath = `${path.dirname(require.main!.filename)}\\${mergedOrderFilePath.replace(/\//g, "\\")}`;
+    const hightlightVideoPath = `${vodFolder}highlights.mp4`;
+    await promiseExec(`ffmpeg -safe 0 -f concat -i ${orderFileAbsolutePath} -c copy ${hightlightVideoPath}`);
     
-    console.log(`Created a highlight video from ${hightlightSpecifications.length} VODs at ${mergedOrderFilePath}`);
-    return mergedOrderFilePath;
+    console.log(`Created a highlight video from ${hightlightSpecifications.length} VODs at ${hightlightVideoPath}`);
+    return hightlightVideoPath;
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
