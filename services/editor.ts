@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HighlightSpecification } from "./common/types";
+import {promiseExec} from "./common/functions";
 
 // Cut the given VODs into a highlight video according to the given hightlight specification.
 const createHighlightVideo = async (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): Promise<void> => {
@@ -17,9 +19,16 @@ const createHighlightVideo = async (vodFolder: string, hightlightSpecifications:
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
-const cutVod = (vodFolder: string, hightlightSpecification: HighlightSpecification): void => {
-    console.log(vodFolder, hightlightSpecification);
+const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification): Promise<void> => {
+    console.log(`Cutting the VOD at ${hightlightSpec.vodFilePath!} into ${hightlightSpec.highlights.length} clips...`);
     
+    const mapNumber = hightlightSpec.vodFilePath!.slice(-6).slice(0, 2);
+    for (const hightlight of hightlightSpec.highlights) {
+        const clipFilePath = `${vodFolder}${mapNumber}_${hightlight.roundNumber}.mp4`;
+        console.log(clipFilePath);
+        
+        await promiseExec(`ffmpeg -ss ${hightlight.start} -i ${hightlightSpec.vodFilePath!} -to ${hightlight.duration} -c copy ${clipFilePath}`);
+    }
 };
 
 export { createHighlightVideo };
