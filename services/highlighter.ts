@@ -15,8 +15,10 @@ const getHighlightSpecification = (demoFolder: string, demoFile: string): Promis
     const demo = fs.readFileSync(`${demoFolder}${demoFile}`);
     extractMoments(demo).then(moments => {
         const highlights: Highlight[] = [];
+        console.log(moments);
         const rounds = splitIntoRounds(moments);
-
+        console.log(rounds);
+        
         rounds.forEach(round => {
             const withoutStart: Moment[] = round.moments.filter(moment => moment.event !== "round_start");
 
@@ -37,7 +39,7 @@ const getHighlightSpecification = (demoFolder: string, demoFile: string): Promis
                 const start = withoutStart[0].time - 5;
                 const end = withoutStart.slice(-1)[0].time + 5;
 
-                highlights.push({ roundNumber: round.id, moments: withoutStart, start: start, duration: Math.round(end - start) });
+                highlights.push({ roundNumber: round.id, moments: withoutStart, start: Math.round(start), duration: Math.round(end - start) });
             }
         });
 
