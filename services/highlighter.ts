@@ -17,7 +17,6 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
     calibrateMomentTimes(moments);
 
     const highlights: Highlight[] = [];
-    console.log(moments);
     const rounds = splitIntoRounds(moments);
 
     rounds.forEach(round => {
@@ -25,8 +24,6 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
 
         // Only adding a highlight if there is more than two events left after cleaning (more than bomb plant and bomb explosion).
         if (round.moments.length > 2) {
-            console.log(round);
-
             const start = round.moments[0].time - 5;
             const end = round.moments.slice(-1)[0].time + 5;
 

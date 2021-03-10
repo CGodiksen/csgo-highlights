@@ -1,3 +1,4 @@
+import fs from "fs/promises";
 import { HighlightSpecification } from "./common/types";
 import {promiseExec} from "./common/functions";
 
@@ -24,9 +25,9 @@ const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification)
     const mapNumber = hightlightSpec.vodFilePath!.slice(-6).slice(0, 2);
     for (const hightlight of hightlightSpec.highlights) {
         const clipFilePath = `${vodFolder}${mapNumber}_${hightlight.roundNumber}.mp4`;
-        console.log(clipFilePath);
-        
         await promiseExec(`ffmpeg -ss ${hightlight.start} -i ${hightlightSpec.vodFilePath!} -to ${hightlight.duration} -c copy ${clipFilePath}`);
+
+        await fs.appendFile(`${vodFolder}${mapNumber}.txt`, `${clipFilePath}\n`);
     }
 };
 
