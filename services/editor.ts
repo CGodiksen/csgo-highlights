@@ -19,16 +19,20 @@ const createHighlightVideo = async (vodFolder: string, hightlightSpecifications:
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
-const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification): Promise<void> => {
+const cutVod = async (vodFolder: string, hightlightSpec: HighlightSpecification): Promise<string> => {
     console.log(`Cutting the VOD at ${hightlightSpec.vodFilePath!} into ${hightlightSpec.highlights.length} clips...`);
     
     const mapNumber = hightlightSpec.vodFilePath!.slice(-6).slice(0, 2);
+    const highlightOrderFilePath = `${vodFolder}${mapNumber}.txt`;
+    
     for (const hightlight of hightlightSpec.highlights) {
         const clipFilePath = `${vodFolder}${mapNumber}_${hightlight.roundNumber}.mp4`;
         await promiseExec(`ffmpeg -ss ${hightlight.start} -i ${hightlightSpec.vodFilePath!} -to ${hightlight.duration} -c copy ${clipFilePath}`);
 
         await fs.appendFile(`${vodFolder}${mapNumber}.txt`, `${clipFilePath}\n`);
     }
+
+    return highlightOrderFilePath;
 };
 
 export { createHighlightVideo };

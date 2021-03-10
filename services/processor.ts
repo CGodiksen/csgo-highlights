@@ -12,7 +12,6 @@ const processMatch = async (matchId: number): Promise<void> => {
     const demoFiles = fs.readdirSync(demoFolder);
     // This should be done right after the demos have been downloaded.
     const hightlightSpecifications = await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
-    console.log(hightlightSpecifications);
     
     const vodFolder = "data/2346587/vods/";
     const vodFiles = await glob(`${vodFolder}*.mp4`);
