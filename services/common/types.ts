@@ -13,7 +13,7 @@ interface Highlight {
 interface HighlightSpecification {
     demoFile: string
     highlights: Highlight[] 
-    vodFile?: string
+    vodFilePath?: string
 }
 
 export { Moment, Highlight, HighlightSpecification };

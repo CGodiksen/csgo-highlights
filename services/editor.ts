@@ -1,10 +1,12 @@
 import { HighlightSpecification } from "./common/types";
 
 // Cut the given VODs into a highlight video according to the given hightlight specification.
-const createHighlightVideo = (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): void => {
-    console.log(vodFolder, hightlightSpecifications);
+const createHighlightVideo = async (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): Promise<void> => {
+    console.log(`Creating a hightlight video for VODs in ${vodFolder}...`);
 
-    const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(getRelatedVodPath(vodFolder, spec), spec)));
+    const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(vodFolder, spec)));
+    console.log(highlightOrderFiles);
+    
     // For each vod do the following concurrently:
         // Create a highlight txt file.
         // Cut out hightlights from the vods.
@@ -15,8 +17,8 @@ const createHighlightVideo = (vodFolder: string, hightlightSpecifications: Highl
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
-const cutVod = (vodFilePath: string, hightlightSpecification: HighlightSpecification): void => {
-    console.log(vodFilePath, hightlightSpecification);
+const cutVod = (vodFolder: string, hightlightSpecification: HighlightSpecification): void => {
+    console.log(vodFolder, hightlightSpecification);
     
 };
 

@@ -14,11 +14,11 @@ const processMatch = async (matchId: number): Promise<void> => {
     const hightlightSpecifications = await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
     console.log(hightlightSpecifications);
     
-    const vodFolder = "data/2346587/vods";
+    const vodFolder = "data/2346587/vods/";
     const vodFiles = await glob(`${vodFolder}*.mp4`);
     hightlightSpecifications.map(spec => addRelatedVod(vodFiles, spec));
 
-    const hightlightVideoPath = createHighlightVideo(vodFolder, hightlightSpecifications);
+    const hightlightVideoPath = await createHighlightVideo(vodFolder, hightlightSpecifications);
     console.log(hightlightVideoPath);
 
     // TODO: Download the demos in parallel with downloading the VODs.
@@ -29,10 +29,10 @@ const processMatch = async (matchId: number): Promise<void> => {
 
 // Adding the VOD file that corresponds to the demo to the hightlight specification. 
 const addRelatedVod = (vodFiles: string[], hightlightSpecification: HighlightSpecification): void => {
-    const relatedVod = vodFiles.find(file => hightlightSpecification.demoFile.includes(file));
+    const relatedVod = vodFiles.find(file => hightlightSpecification.demoFile.includes(file.slice(-6).slice(0, 2)));
     
     if (relatedVod) {
-        hightlightSpecification.vodFile = relatedVod;
+        hightlightSpecification.vodFilePath = relatedVod;
     } else {
         throw "Could not find a VOD for the hightlight specification.";
     }
