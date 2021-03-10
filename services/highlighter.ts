@@ -19,19 +19,17 @@ const getHighlightSpecification = async (demoFolder: string, demoFile: string): 
     const highlights: Highlight[] = [];
     console.log(moments);
     const rounds = splitIntoRounds(moments);
-    console.log(rounds);
 
     rounds.forEach(round => {
-        const withoutStart: Moment[] = round.moments.filter(moment => moment.event !== "round_start");
-
-        // Only adding a highlight if there is more than two events (more than bomb plant and bomb explosion).
-        if (withoutStart.length > 2) {
-            cleanMoments(withoutStart);
+        // Only adding a highlight if there is more than two actual events (more than bomb plant and bomb explosion).
+        if (round.moments.length > 3) {
+            cleanRoundMoments(round);
+            console.log(round);
             
-            const start = withoutStart[0].time - 5;
-            const end = withoutStart.slice(-1)[0].time + 5;
+            const start = round.moments[0].time - 5;
+            const end = round.moments.slice(-1)[0].time + 5;
 
-            highlights.push({ roundNumber: round.id, moments: withoutStart, start: Math.round(start), duration: Math.round(end - start) });
+            highlights.push({ roundNumber: round.id, moments: round.moments, start: Math.round(start), duration: Math.round(end - start) });
         }
     });
 
@@ -89,7 +87,6 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
 
     moments.forEach(moment => {
         if (moment.event === "round_end") {
-            round.moments.push(moment);
             rounds.push(round);
             
             roundCounter += 1;
@@ -102,21 +99,20 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
     return rounds;
 };
 
-// Removing moments from the given list of moments that would decrease the viewing quality of the highlight.
-const cleanMoments = (moments: Moment[]): void => {
-    // Removing the end of the round if the T's are saving.
-    
+// Removing moments from the given round that would decrease the viewing quality of the highlight.
+const cleanRoundMoments = (round: Round): void => {
+    round.moments = round.moments.filter(moment => moment.event !== "round_start");
     
     // Removing kills that are seperate from the actual highlight of the round.
     for (let i = 1; i >= 0; i--) {
-        if (moments[i].event === "player_death" && (moments[i + 1].time - moments[i].time) > 30) {
-            moments.splice(i, 1);
+        if (round.moments[i].event === "player_death" && (round.moments[i + 1].time - round.moments[i].time) > 30) {
+            round.moments.splice(i, 1);
         }
     }
     
     // Removing the bomb explosion if the CT's are saving and nothing happens between bomb plant and explosion.
-    if (moments.slice(-1)[0].event === "bomb_exploded" && moments.slice(-2)[0].event === "bomb_planted") {
-        moments.splice(-1, 1);
+    if (round.moments.slice(-1)[0].event === "bomb_exploded" && round.moments.slice(-2)[0].event === "bomb_planted") {
+        round.moments.splice(-1, 1);
     }
 };
 
