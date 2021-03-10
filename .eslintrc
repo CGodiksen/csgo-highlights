@@ -16,7 +16,8 @@
           "error", { "argsIgnorePattern": "^_" }
       ],
        "@typescript-eslint/no-explicit-any": 1,
-      "no-case-declarations": 0
+      "no-case-declarations": 0,
+      "@typescript-eslint/no-non-null-assertion": "off"
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {

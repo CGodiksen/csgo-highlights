@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HighlightSpecification } from "./common/types";
 import {promiseExec} from "./common/functions";
 
