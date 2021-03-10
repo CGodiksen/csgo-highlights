@@ -100,7 +100,7 @@ const splitIntoRounds = (moments: Moment[]): Round[] => {
 };
 
 // Removing moments from the given list of moments that would decrease the viewing quality of the highlight.
-const cleanMoments = (moments: Moment[]): Moment[] => {
+const cleanMoments = (moments: Moment[]): void => {
     // Removing kills that are seperate from the actual highlight of the round.
     for (let i = 1; i >= 0; i--) {
         if (moments[i].event === "player_death" && (moments[i + 1].time - moments[i].time) > 30) {
@@ -112,8 +112,6 @@ const cleanMoments = (moments: Moment[]): Moment[] => {
     if (moments.slice(-1)[0].event === "bomb_exploded" && moments.slice(-2)[0].event === "bomb_planted") {
         moments.splice(-1, 1);
     }
-
-    return moments;
 };
 
 const getDuration = (demo: Buffer): Promise<number> => new Promise(resolve => {
