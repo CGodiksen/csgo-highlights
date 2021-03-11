@@ -27,6 +27,6 @@
 import HLTV from 'hltv';
 import { uploadHighlightVideo } from "./upload";
 
-void HLTV.getMatch({ id: 2346587 }).then(res => {
-    uploadHighlightVideo("testing", res);
+void HLTV.getMatch({ id: 2346587 }).then(async res => {
+    await uploadHighlightVideo("data/2346587/vods/highlights.mp4", res, "");
 });
