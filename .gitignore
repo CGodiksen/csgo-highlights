@@ -118,3 +118,4 @@ dist
 build/
 data/
 config/
+credentials/

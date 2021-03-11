@@ -3,7 +3,7 @@ import readline from 'readline';
 import { google } from 'googleapis';
 const OAuth2 = google.auth.OAuth2;
 const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
-const TOKEN_DIR = (process.env.HOME! || process.env.HOMEPATH! || process.env.USERPROFILE!) + '/.credentials/';
+const TOKEN_DIR = 'credentials/';
 const TOKEN_PATH = TOKEN_DIR + 'youtube-nodejs.json';
 
 import { FullMatch } from "hltv/lib/models/FullMatch";
@@ -28,16 +28,31 @@ const uploadHighlightVideo = (videoPath: string, match: FullMatch): void => {
     console.log(videoPath, match);
     const title = createTitle(match);
     console.log(title);
+    setupYoutubeAPI();
 
     // TODO: Based on the match create a title for the video.
-    // TODO: Upload the highlight video with the created title 
+    // TODO: Upload the highlight video with the created title.
+    // TODO: Add the video to a playlist for the event and for the teams.
 };
 
 const createTitle = (match: FullMatch) => {
     return `${match.team1!.name} vs ${match.team2!.name} - ${match.event.name} - HIGHLIGHTS | CSGO`;
 };
 
-// Create an OAuth2 client with the given credentials, and then execute the given callback function.
+const setupYoutubeAPI = () => {
+    // Load client secrets from a local file.
+    fs.readFile('config/client_secret.json', function processClientSecrets(err, content) {
+        if (err) {
+            console.log('Error loading client secret file: ', err);
+            return;
+        }
+        // Authorize a client with the loaded credentials, then call the YouTube API.
+        const oAuth2Client = authorize(JSON.parse(content.toString()));
+        console.log(oAuth2Client);
+    });
+};
+
+// Create an OAuth2 client with the given credentials.
 const authorize = (credentials: Credential): OAuth2Client => {
     const clientSecret = credentials.installed.client_secret;
     const clientId = credentials.installed.client_id;
@@ -53,10 +68,11 @@ const authorize = (credentials: Credential): OAuth2Client => {
             return oauth2Client;
         }
     });
+    return oauth2Client;
 };
 
 // Get and store new token after prompting for user authorization.
-function getNewToken(oauth2Client: OAuth2Client): OAuth2Client {
+const getNewToken = (oauth2Client: OAuth2Client): OAuth2Client => {
     const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES
