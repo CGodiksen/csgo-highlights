@@ -1,8 +1,12 @@
 import fs from "fs";
 import glob from "glob-promise";
+import HLTV from 'hltv';
+import { downloadDemos } from "./download/demos";
+import { downloadVods } from "./download/vods";
 import { HighlightSpecification } from "./common/types";
 import { createHighlightVideo } from "./editor";
 import { getHighlightSpecification } from "./highlight";
+import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
 const processMatch = async (matchId: number): Promise<void> => {
@@ -26,10 +30,16 @@ const processMatch = async (matchId: number): Promise<void> => {
     // TODO: When the editor is done we send the filepath to the highlight video to the uploader and finish after.
 };
 
+const downloadAndParseDemos = async (match: FullMatch): Promise<HighlightSpecification[]> => {
+    const demoFolder = await downloadDemos(match);
+    const demoFiles = fs.readdirSync(demoFolder);
+    return await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
+};
+
 // Adding the VOD file that corresponds to the demo to the hightlight specification. 
 const addRelatedVod = (vodFiles: string[], hightlightSpecification: HighlightSpecification): void => {
     const relatedVod = vodFiles.find(file => hightlightSpecification.demoFile.includes(file.slice(-6).slice(0, 2)));
-    
+
     if (relatedVod) {
         hightlightSpecification.vodFilePath = relatedVod;
     } else {
