@@ -1,5 +1,5 @@
 import axios from 'axios';
-import fse from "fs-extra";
+import fs from "fs/promises";
 
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
@@ -15,7 +15,7 @@ const downloadDemos = async (match: FullMatch): Promise<string> => {
 
         // Extracting the dem files from the downloaded rar and deleting it after.
         await promiseExec(`unrar e ${rarFile} ${saveFolder}`);
-        fse.unlinkSync(rarFile);
+        await fs.unlink(rarFile);
     }
     catch (downloadDemoError) {
         console.error(downloadDemoError);
@@ -32,7 +32,7 @@ const downloadDemoRar = async (demos: Demo[], saveFolder: string): Promise<strin
 
     if (demoURL) {
         const res = await axios.get(`https://www.hltv.org${demoURL}`, { responseType: 'arraybuffer' });
-        await fse.outputFile(savePath, res.data);
+        await fs.writeFile(savePath, res.data);
 
         return savePath;
     } else {
