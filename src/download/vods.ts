@@ -14,7 +14,7 @@ interface VodInfo {
     downloadUrls: string[]
 }
 
-const downloadVods = async (match: FullMatch): Promise<void> => {
+const downloadVods = async (match: FullMatch): Promise<string> => {
     console.log(`Downloading VODs from match ${match.id}...`);
     
     const saveFolder = `data/${match.id}/vods/`;
@@ -24,6 +24,7 @@ const downloadVods = async (match: FullMatch): Promise<void> => {
     Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
 
     console.log(`Downloaded ${vods.length} VODs from match ${match.id} to ${saveFolder}`);
+    return saveFolder;
 };
 
 // Return a list with a VodInfo object for each available Vod in the given match.
