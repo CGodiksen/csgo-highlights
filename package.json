@@ -28,6 +28,8 @@
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "glob-promise": "^4.1.0",
+    "google-auth-library": "^7.0.2",
+    "googleapis": "^67.1.1",
     "hltv": "^2.24.2",
     "sharp": "^0.27.2"
   }
