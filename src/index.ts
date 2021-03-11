@@ -10,16 +10,23 @@
 // import { downloadDemos } from "./services/download/demos";
 // import HLTV from 'hltv';
 // void HLTV.getMatch({ id: 2306295 }).then(res => {
-    //     downloadDemos(res)
-    //         .then(demoFolder => console.log(demoFolder))
-    //         .catch(e => console.log(e));
-    // });
-    
-    // import { downloadVods } from "./services/download/vods";
-    // import HLTV from 'hltv';
-    // void HLTV.getMatch({ id: 2346587 }).then(res => {
-        //     void downloadVods(res);
-        // });
-        
-import { processMatch } from "./services/processor";
-void processMatch(2346587);
+//     downloadDemos(res)
+//         .then(demoFolder => console.log(demoFolder))
+//         .catch(e => console.log(e));
+// });
+
+// import { downloadVods } from "./services/download/vods";
+// import HLTV from 'hltv';
+// void HLTV.getMatch({ id: 2346587 }).then(res => {
+//     void downloadVods(res);
+// });
+
+// import { processMatch } from "./process";
+// void processMatch(2346587);
+
+import HLTV from 'hltv';
+import { uploadHighlightVideo } from "./upload";
+
+void HLTV.getMatch({ id: 2346587 }).then(res => {
+    uploadHighlightVideo("testing", res);
+});

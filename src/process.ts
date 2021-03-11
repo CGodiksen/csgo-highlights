@@ -2,7 +2,7 @@ import fs from "fs";
 import glob from "glob-promise";
 import { HighlightSpecification } from "./common/types";
 import { createHighlightVideo } from "./editor";
-import { getHighlightSpecification } from "./highlighter";
+import { getHighlightSpecification } from "./highlight";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
 const processMatch = async (matchId: number): Promise<void> => {
