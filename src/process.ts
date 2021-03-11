@@ -3,6 +3,7 @@ import glob from "glob-promise";
 import HLTV from 'hltv';
 import { downloadDemos } from "./download/demos";
 import { downloadVods } from "./download/vods";
+import { uploadHighlightVideo } from "./upload";
 import { HighlightSpecification } from "./common/types";
 import { createHighlightVideo } from "./editor";
 import { getHighlightSpecification } from "./highlight";
@@ -10,24 +11,19 @@ import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
 const processMatch = async (matchId: number): Promise<void> => {
-    console.log(matchId);
+    const match = await HLTV.getMatch({ id: matchId });
 
-    const demoFolder = "data/2346587/demos/";
-    const demoFiles = fs.readdirSync(demoFolder);
-    // This should be done right after the demos have been downloaded.
-    const hightlightSpecifications = await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
-    
-    const vodFolder = "data/2346587/vods/";
+    const hightlightSpecifications = await downloadAndParseDemos(match);
+
+    const vodFolder = await downloadVods(match);
     const vodFiles = await glob(`${vodFolder}*.mp4`);
     hightlightSpecifications.map(spec => addRelatedVod(vodFiles, spec));
 
     const hightlightVideoPath = await createHighlightVideo(vodFolder, hightlightSpecifications);
-    console.log(hightlightVideoPath);
+    await uploadHighlightVideo(hightlightVideoPath, match, "C:/Users/chris/Desktop/Highlights");
 
     // TODO: Download the demos in parallel with downloading the VODs.
-    // TODO: Downloading the demos should be grouped with a function that immediately sends them along to the getHightlights function.
     // TODO: When the two above parallel functions are done (downloadDemos -> getHighlights and downloadVods) we send it to the editor.
-    // TODO: When the editor is done we send the filepath to the highlight video to the uploader and finish after.
 };
 
 const downloadAndParseDemos = async (match: FullMatch): Promise<HighlightSpecification[]> => {
