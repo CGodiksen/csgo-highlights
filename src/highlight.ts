@@ -4,8 +4,8 @@ import demofile = require("demofile");
 import { Moment, Highlight, HighlightSpecification } from "./common/types";
 
 interface Round {
-    id: number
-    moments: Moment[]
+    id: number;
+    moments: Moment[];
 }
 
 // Return a highlight specification that describes the segments that should be included in a highlight video of the given demo.

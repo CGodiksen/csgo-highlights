@@ -6,12 +6,12 @@ import { MapResult } from 'hltv/lib/models/MapResult';
 import { promiseExec } from "../common/functions";
 
 interface VodInfo {
-    game: number
-    map: MapResult
-    provider: "Twitch" | "Youtube"
-    url: string
-    vodStart: number
-    downloadUrls: string[]
+    game: number;
+    map: MapResult;
+    provider: "Twitch" | "Youtube";
+    url: string;
+    vodStart: number;
+    downloadUrls: string[];
 }
 
 // Return a promose to deliver the VOD files folder when done downloading.
