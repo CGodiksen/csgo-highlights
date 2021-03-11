@@ -47,12 +47,39 @@ const authorize = (credentials: Credential): OAuth2Client => {
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH, (err, token) => {
         if (err) {
-            return getNewToken(oauth2Client, callback);
+            return getNewToken(oauth2Client);
         } else {
             oauth2Client.credentials = JSON.parse(token.toString()) as Credentials;
             return oauth2Client;
         }
     });
 };
+
+// Get and store new token after prompting for user authorization.
+function getNewToken(oauth2Client: OAuth2Client): OAuth2Client {
+    const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES
+    });
+
+    console.log('Authorize this app by visiting this url: ', authUrl);
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.question('Enter the code from that page here: ', function (code) {
+        rl.close();
+        oauth2Client.getToken(code, function (err, token) {
+            if (err) {
+                console.log('Error while trying to retrieve access token', err);
+                return;
+            }
+            oauth2Client.credentials = token!;
+            storeToken(token);
+        });
+    });
+    return oauth2Client;
+}
 
 export { uploadHighlightVideo };
