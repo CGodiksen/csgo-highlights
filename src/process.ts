@@ -11,23 +11,21 @@ import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
 const processMatch = async (matchId: number): Promise<void> => {
-    await createFolderStructure(matchId);
+    // Set up the folder structure used throughout the process.
+    await fs.mkdir(`data/${matchId}/demos`, { recursive: true });
+    await fs.mkdir(`data/${matchId}/vods`, { recursive: true });
+
     const match = await HLTV.getMatch({ id: matchId });
 
     // Download the demos and get highlights in parallel with downloading the VODs.
-    const  [hightlightSpecifications, vodFolder] = await Promise.all([downloadAndParseDemos(match), downloadVods(match)]);
-
+    const [hightlightSpecifications, vodFolder] = await Promise.all([downloadAndParseDemos(match), downloadVods(match)]);
     const vodFiles = await glob(`${vodFolder}*.mp4`);
     hightlightSpecifications.map(spec => addRelatedVod(vodFiles, spec));
 
     const hightlightVideoPath = await createHighlightVideo(vodFolder, hightlightSpecifications);
     await uploadHighlightVideo(hightlightVideoPath, match, "C:/Users/chris/Desktop/Highlights");
-};
 
-// Set up the folder structure used throughout the process.
-const createFolderStructure = async (matchId: number) => {
-    await fs.mkdir(`data/${matchId}/demos`);
-    await fs.mkdir(`data/${matchId}/vods`);
+    await fs.rmdir(`data/${matchId}`, { recursive: true });
 };
 
 const downloadAndParseDemos = async (match: FullMatch): Promise<HighlightSpecification[]> => {
