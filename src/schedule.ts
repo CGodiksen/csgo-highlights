@@ -1,5 +1,6 @@
 import HLTV from 'hltv';
 import fs = require("fs");
+import { processMatch } from "./process";
 import { UpcomingMatch } from 'hltv/lib/models/UpcomingMatch';
 
 // Start the different jobs and runs them according to the given interval.
@@ -46,8 +47,7 @@ const checkIfDone = (matches: UpcomingMatch[]): void => {
         if (match.date && match.format && match.date + getTimeOffset(match.format) < Date.now()) {
             void HLTV.getMatch({ id: match.id }).then(res => {
                 if (res.demos && res.streams) {
-                    // Start processing here.
-                    console.log(res);
+                    void processMatch(res);
                 }
             });
         }

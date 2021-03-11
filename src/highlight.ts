@@ -1,5 +1,5 @@
 // TODO: Remove irrelevant rounds (eco-rounds)
-import fs from "fs";
+import fs from "fs/promises";
 import demofile = require("demofile");
 import { Moment, Highlight, HighlightSpecification } from "./common/types";
 
@@ -12,7 +12,7 @@ interface Round {
 const getHighlightSpecification = async (demoFolder: string, demoFile: string): Promise<HighlightSpecification> => {
     console.log(`Creating a highlight specification for the demo at ${demoFile}...`);
 
-    const demo = fs.readFileSync(`${demoFolder}${demoFile}`);
+    const demo = await fs.readFile(`${demoFolder}${demoFile}`);
     const moments = await extractMoments(demo);
     calibrateMomentTimes(moments);
 
