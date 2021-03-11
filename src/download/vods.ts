@@ -3,7 +3,7 @@ import vision from '@google-cloud/vision';
 
 import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { MapResult } from 'hltv/lib/models/MapResult';
-import {promiseExec} from "../common/functions";
+import { promiseExec } from "../common/functions";
 
 interface VodInfo {
     game: number
@@ -17,14 +17,18 @@ interface VodInfo {
 // Return a promose to deliver the VOD files folder when done downloading.
 const downloadVods = async (match: FullMatch): Promise<string> => {
     console.log(`Downloading VODs from match ${match.id}...`);
-    
     const saveFolder = `data/${match.id}/vods/`;
-    const vods = await getVodInfo(match);
 
-    // Downloading each vod concurrently.
-    Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => {console.error(e);});
+    try {
+        const vods = await getVodInfo(match);
 
-    console.log(`Downloaded ${vods.length} VODs from match ${match.id} to ${saveFolder}`);
+        // Downloading each vod concurrently.
+        Promise.all(vods.map(vod => downloadVod(vod, saveFolder))).catch(e => { console.error(e); });
+
+        console.log(`Downloaded ${vods.length} VODs from match ${match.id} to ${saveFolder}`);
+    } catch (downloadVodError) {
+        console.error(downloadVodError);
+    }
     return saveFolder;
 };
 
@@ -66,58 +70,43 @@ const parseLink = async (link: string, map: MapResult, game: number): Promise<Vo
 
 // Use youtube-dl to get the download url(s). For youtube vods this will return a seperate url for video and audio.
 const getDownloadUrls = async (url: string): Promise<string[]> => {
-    let downloadUrls: string[] = [];
-    try {
-        const { stdout } = await promiseExec(`youtube-dl --youtube-skip-dash-manifest -g ${url}`);
-        downloadUrls = stdout.split("\n");
-
-    } catch (e) {
-        console.error(e);
-    }
-    return downloadUrls;
+    const { stdout } = await promiseExec(`youtube-dl --youtube-skip-dash-manifest -g ${url}`);
+    return stdout.split("\n");
 };
 
 // Return a promise to download the vod from the given link.
 const downloadVod = async (vodInfo: VodInfo, saveFolder: string): Promise<void> => {
-    try {
-        await calibrateVodStart(vodInfo, saveFolder);
+    await calibrateVodStart(vodInfo, saveFolder);
 
-        const approxDuration = approximateMapDuration(vodInfo.map);
-        const savePath = `${saveFolder}m${vodInfo.game}.mp4`;
+    const approxDuration = approximateMapDuration(vodInfo.map);
+    const savePath = `${saveFolder}m${vodInfo.game}.mp4`;
 
-        if (vodInfo.provider == "Twitch") {
-            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c copy ${savePath}`);
-        } else {
-            await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
-        }
-        console.log(`Downloaded VOD of game ${vodInfo.game} on ${vodInfo.map.name} to ${savePath}`);
-    } catch (e) {
-        console.error(e);
+    if (vodInfo.provider == "Twitch") {
+        await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -to ${approxDuration} -c copy ${savePath}`);
+    } else {
+        await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[1]}" -to ${approxDuration} -map 0:v -map 1:a -c:v libx264 -c:a aac ${savePath}`);
     }
+    console.log(`Downloaded VOD of game ${vodInfo.game} on ${vodInfo.map.name} to ${savePath}`);
 };
 
 // Find the actual start of the game and change the link to reflect this.
 const calibrateVodStart = async (vodInfo: VodInfo, saveFolder: string): Promise<void> => {
-    try {
-        // Adding 20 seconds to the vodstart to ensure that the timer is visible on the first frame.
-        vodInfo.vodStart += 20;
+    // Adding 20 seconds to the vodstart to ensure that the timer is visible on the first frame.
+    vodInfo.vodStart += 20;
 
-        // Downloading a single frame from the VOD.
-        const fileName = `${saveFolder}${vodInfo.map.name}.jpg`;
-        await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
+    // Downloading a single frame from the VOD.
+    const fileName = `${saveFolder}${vodInfo.map.name}.jpg`;
+    await promiseExec(`ffmpeg -ss ${vodInfo.vodStart} -i "${vodInfo.downloadUrls[0]}" -vframes 1 -q:v 2 ${fileName}`);
 
-        // Cropping the downloaded frame to focus it on the scoreboard and the timer.
-        const croppedFileName = `${saveFolder}${vodInfo.map.name}_cropped.jpg`;
-        await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
+    // Cropping the downloaded frame to focus it on the scoreboard and the timer.
+    const croppedFileName = `${saveFolder}${vodInfo.map.name}_cropped.jpg`;
+    await sharp(fileName).extract({ width: 1280, height: 150, left: 0, top: 0 }).toFile(croppedFileName);
 
-        const timeLeftOnFrame = await getRoundTime(croppedFileName);
+    const timeLeftOnFrame = await getRoundTime(croppedFileName);
 
-        if (timeLeftOnFrame) {
-            // Adjusting the start time based on the time left in the round on the first frame.
-            vodInfo.vodStart = vodInfo.vodStart - (135 - timeLeftOnFrame);
-        }
-    } catch (e) {
-        console.error(e);
+    if (timeLeftOnFrame) {
+        // Adjusting the start time based on the time left in the round on the first frame.
+        vodInfo.vodStart = vodInfo.vodStart - (135 - timeLeftOnFrame);
     }
 };
 
