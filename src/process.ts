@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import glob from "glob-promise";
+import os from "os";
+
 import { downloadDemos } from "./download/demos";
 import { downloadVods } from "./download/vods";
 import { uploadHighlightVideo } from "./upload";
@@ -20,7 +22,7 @@ const processMatch = async (match: FullMatch): Promise<void> => {
     hightlightSpecifications.map(spec => addRelatedVod(vodFiles, spec));
 
     const hightlightVideoPath = await createHighlightVideo(vodFolder, hightlightSpecifications);
-    await uploadHighlightVideo(hightlightVideoPath, match, "C:/Users/chris/Desktop/Highlights");
+    await uploadHighlightVideo(hightlightVideoPath, match, `${os.homedir()}/Desktop/`);
 
     await fs.rmdir(`data/${match.id}`, { recursive: true });
 };
