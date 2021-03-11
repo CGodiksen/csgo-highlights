@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs/promises";
 import glob from "glob-promise";
 import HLTV from 'hltv';
 import { downloadDemos } from "./download/demos";
@@ -11,6 +11,7 @@ import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // Fully process a single match, from downloading to editing and finally uploading it to youtube.
 const processMatch = async (matchId: number): Promise<void> => {
+    await createFolderStructure(matchId);
     const match = await HLTV.getMatch({ id: matchId });
 
     // Download the demos and get highlights in parallel with downloading the VODs.
@@ -23,9 +24,15 @@ const processMatch = async (matchId: number): Promise<void> => {
     await uploadHighlightVideo(hightlightVideoPath, match, "C:/Users/chris/Desktop/Highlights");
 };
 
+// Set up the folder structure used throughout the process.
+const createFolderStructure = async (matchId: number) => {
+    await fs.mkdir(`data/${matchId}/demos`);
+    await fs.mkdir(`data/${matchId}/vods`);
+};
+
 const downloadAndParseDemos = async (match: FullMatch): Promise<HighlightSpecification[]> => {
     const demoFolder = await downloadDemos(match);
-    const demoFiles = fs.readdirSync(demoFolder);
+    const demoFiles = await fs.readdir(demoFolder);
     return await Promise.all(demoFiles.map(demoFile => getHighlightSpecification(demoFolder, demoFile)));
 };
 

@@ -5,7 +5,7 @@ import { FullMatch } from 'hltv/lib/models/FullMatch';
 import { Demo } from 'hltv/lib/models/Demo';
 import {promiseExec} from "../common/functions";
 
-// Return the folder containing the downloaded demo files when done downloading and extracting.
+// Return a promose to deliver the demo files folder when done downloading.
 const downloadDemos = async (match: FullMatch): Promise<string> => {
     console.log(`Downloading demos from match ${match.id}...`);
     

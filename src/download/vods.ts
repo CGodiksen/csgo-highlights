@@ -14,6 +14,7 @@ interface VodInfo {
     downloadUrls: string[]
 }
 
+// Return a promose to deliver the VOD files folder when done downloading.
 const downloadVods = async (match: FullMatch): Promise<string> => {
     console.log(`Downloading VODs from match ${match.id}...`);
     
