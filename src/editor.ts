@@ -7,18 +7,23 @@ import { promiseExec } from "./common/functions";
 const createHighlightVideo = async (vodFolder: string, hightlightSpecifications: HighlightSpecification[]): Promise<string> => {
     console.log(`Creating a hightlight video for VODs in ${vodFolder}...`);
 
-    const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(vodFolder, spec)));
+    try {
+        const highlightOrderFiles = await Promise.all(hightlightSpecifications.map(spec => cutVod(vodFolder, spec)));
 
-    // Merge the text files specifying the order of the clips into a single hightlight txt file.
-    const mergedOrderFilePath = await mergeOrderFiles(vodFolder, highlightOrderFiles);
+        // Merge the text files specifying the order of the clips into a single hightlight txt file.
+        const mergedOrderFilePath = await mergeOrderFiles(vodFolder, highlightOrderFiles);
 
-    // Use the ffmpeg concat demuxer method to concatenate all hightlight clips into a single hightlight video.
-    const orderFileAbsolutePath = `${path.dirname(require.main!.filename)}\\${mergedOrderFilePath.replace(/\//g, "\\")}`;
-    const hightlightVideoPath = `${vodFolder}highlights.mp4`;
-    await promiseExec(`ffmpeg -safe 0 -f concat -i ${orderFileAbsolutePath} -c copy ${hightlightVideoPath}`);
-    
-    console.log(`Created a highlight video from ${hightlightSpecifications.length} VODs at ${hightlightVideoPath}`);
-    return hightlightVideoPath;
+        // Use the ffmpeg concat demuxer method to concatenate all hightlight clips into a single hightlight video.
+        const orderFileAbsolutePath = `${path.dirname(require.main!.filename)}\\${mergedOrderFilePath.replace(/\//g, "\\")}`;
+        const hightlightVideoPath = `${vodFolder}highlights.mp4`;
+        await promiseExec(`ffmpeg -safe 0 -f concat -i ${orderFileAbsolutePath} -c copy ${hightlightVideoPath}`);
+
+        console.log(`Created a highlight video from ${hightlightSpecifications.length} VODs at ${hightlightVideoPath}`);
+        return hightlightVideoPath;
+    } catch (createVideoError) {
+        console.error(createVideoError);
+        return "";
+    }
 };
 
 // Cut out hightlights from the vod and return a promise to deliver the file path to a txt file specifying the intended order of the clips.
