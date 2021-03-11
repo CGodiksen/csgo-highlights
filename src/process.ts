@@ -13,17 +13,14 @@ import { FullMatch } from "hltv/lib/models/FullMatch";
 const processMatch = async (matchId: number): Promise<void> => {
     const match = await HLTV.getMatch({ id: matchId });
 
-    const hightlightSpecifications = await downloadAndParseDemos(match);
+    // Download the demos and get highlights in parallel with downloading the VODs.
+    const  [hightlightSpecifications, vodFolder] = await Promise.all([downloadAndParseDemos(match), downloadVods(match)]);
 
-    const vodFolder = await downloadVods(match);
     const vodFiles = await glob(`${vodFolder}*.mp4`);
     hightlightSpecifications.map(spec => addRelatedVod(vodFiles, spec));
 
     const hightlightVideoPath = await createHighlightVideo(vodFolder, hightlightSpecifications);
     await uploadHighlightVideo(hightlightVideoPath, match, "C:/Users/chris/Desktop/Highlights");
-
-    // TODO: Download the demos in parallel with downloading the VODs.
-    // TODO: When the two above parallel functions are done (downloadDemos -> getHighlights and downloadVods) we send it to the editor.
 };
 
 const downloadAndParseDemos = async (match: FullMatch): Promise<HighlightSpecification[]> => {
