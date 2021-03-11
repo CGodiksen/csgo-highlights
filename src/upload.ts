@@ -76,10 +76,22 @@ function getNewToken(oauth2Client: OAuth2Client): OAuth2Client {
                 return;
             }
             oauth2Client.credentials = token!;
-            storeToken(token);
+            storeToken(token!);
         });
     });
     return oauth2Client;
-}
+};
+
+// Store token to disk be used in later program executions.
+const storeToken = (token: Credentials) => {
+    if (!fs.existsSync(TOKEN_DIR)) {
+        fs.mkdirSync(TOKEN_DIR);
+    }
+
+    fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        if (err) throw err;
+        console.log('Token stored to ' + TOKEN_PATH);
+    });
+};
 
 export { uploadHighlightVideo };
