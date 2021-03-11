@@ -1,4 +1,4 @@
-// TODO: Remove irrelevant rounds (eco-rounds)
+// TODO: Remove irrelevant rounds (eco-rounds) and handle pauses.
 import fs from "fs/promises";
 import demofile = require("demofile");
 import { Moment, Highlight, HighlightSpecification } from "./common/types";
