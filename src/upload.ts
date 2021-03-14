@@ -67,9 +67,14 @@ const upload = async (fileName: string) => {
 };
 
 const getOAuth2Client = () => {
-    const client_secret = JSON.parse(fs.readFileSync('../config/client_secret.json').toString());
-    const auth = new google.auth.OAuth2(client_secret.client_id, client_secret.client_secret, client_secret.redirect_uris[0]);
- 
+    const clientSecret = JSON.parse(fs.readFileSync('../config/client_secret.json').toString());
+    const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
+    
+    // If a refresh token is available then use it, otherwise create one by requesting access from the user.
+    if (fs.existsSync('../config/refresh.json')) {
+        const refreshToken = JSON.parse(fs.readFileSync('../config/refresh.json').toString());
+        auth.setCredentials({refresh_token: refreshToken.refresh_token});
+    }
 };
 
 
