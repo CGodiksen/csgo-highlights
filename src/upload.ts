@@ -2,9 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import fs from "fs";
+import path from "path";
 import { google } from 'googleapis';
 import { authenticate } from '@google-cloud/local-auth';
-import fs from "fs";
 // import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // initialize the Youtube API library
@@ -81,7 +82,7 @@ const getOAuth2Client = async () => {
 // Creating a new access token and saving the refresh token to refresh.json in the config folder.
 const createNewToken = async (clientSecretPath: string, refreshPath: string) => {
     const auth = await authenticate({
-        keyfilePath: clientSecretPath,
+        keyfilePath: path.join(__dirname, `../${clientSecretPath}`),
         scopes: [
             'https://www.googleapis.com/auth/youtube.upload',
             'https://www.googleapis.com/auth/youtube',
