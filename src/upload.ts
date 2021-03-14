@@ -3,32 +3,33 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import path from 'path';
-import readline from 'readline';
 import { google } from 'googleapis';
 import { authenticate } from '@google-cloud/local-auth';
 import fs from "fs";
-import { FullMatch } from "hltv/lib/models/FullMatch";
+// import { FullMatch } from "hltv/lib/models/FullMatch";
 
 // initialize the Youtube API library
 const youtube = google.youtube('v3');
 
 // "Upload" the video by saving it to the specified location under a match specific name.
-const uploadHighlightVideo = async (videoPath: string, match: FullMatch, savePath: string): Promise<void> => {
+const uploadHighlightVideo = async (videoPath: string): Promise<void> => {
 
-    const title = createTitle(match);
-    const filePath = `${savePath}${title.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, "")}.mp4`;
+    // const title = createTitle(match);
+    // console.log(title, savePath);
+    
+    // const filePath = `${savePath}${title.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, "")}.mp4`;
 
     try {
-        fs.renameSync(videoPath, filePath);
-        console.log(`"Uploaded" the highlight video at ${videoPath} to ${filePath}`);
+        await upload(videoPath);
+        // console.log(`"Uploaded" the highlight video at ${videoPath} to ${filePath}`);
     } catch (uploadError) {
         console.error(uploadError);
     }
 };
 
-const createTitle = (match: FullMatch) => {
-    return `${match.team1!.name} vs ${match.team2!.name} - ${match.event.name}`;
-};
+// const createTitle = (match: FullMatch) => {
+//     return `${match.team1!.name} vs ${match.team2!.name} - ${match.event.name}`;
+// };
 
 // very basic example of uploading a video to youtube
 const upload = async (fileName: string) => {
