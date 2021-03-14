@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 //import path from 'path';
 import { google } from 'googleapis';
-//import { authenticate } from '@google-cloud/local-auth';
+import { authenticate } from '@google-cloud/local-auth';
 import fs from "fs";
 // import { FullMatch } from "hltv/lib/models/FullMatch";
 
@@ -16,7 +16,7 @@ const uploadHighlightVideo = async (videoPath: string): Promise<void> => {
 
     // const title = createTitle(match);
     // console.log(title, savePath);
-    
+
     // const filePath = `${savePath}${title.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, "")}.mp4`;
 
     try {
@@ -33,17 +33,8 @@ const uploadHighlightVideo = async (videoPath: string): Promise<void> => {
 
 // very basic example of uploading a video to youtube
 const upload = async (fileName: string) => {
-    // // Obtain user credentials to use for the request
-    // const auth = await authenticate({
-    //     keyfilePath: path.join(__dirname, '../config/client_secret.json'),
-    //     scopes: [
-    //         'https://www.googleapis.com/auth/youtube.upload',
-    //         'https://www.googleapis.com/auth/youtube',
-    //     ],
-    // });
-
     google.options({ auth });
-    
+
     const res = await youtube.videos.insert(
         {
             part: ['id,snippet,status'],
@@ -66,14 +57,26 @@ const upload = async (fileName: string) => {
     return res.data;
 };
 
-const getOAuth2Client = () => {
-    const clientSecret = JSON.parse(fs.readFileSync('../config/client_secret.json').toString());
-    const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
-    
+const getOAuth2Client = async () => {
     // If a refresh token is available then use it, otherwise create one by requesting access from the user.
     if (fs.existsSync('../config/refresh.json')) {
+        const clientSecret = JSON.parse(fs.readFileSync('../config/client_secret.json').toString());
+        const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
+
         const refreshToken = JSON.parse(fs.readFileSync('../config/refresh.json').toString());
-        auth.setCredentials({refresh_token: refreshToken.refresh_token});
+        auth.setCredentials({ refresh_token: refreshToken.refresh_token });
+
+        return auth;
+    } else {
+        const auth = await authenticate({
+            keyfilePath: '../config/client_secret.json',
+            scopes: [
+                'https://www.googleapis.com/auth/youtube.upload',
+                'https://www.googleapis.com/auth/youtube',
+            ],
+        });
+
+        return auth;
     }
 };
 
