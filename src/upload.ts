@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-//import path from 'path';
 import { google } from 'googleapis';
 import { authenticate } from '@google-cloud/local-auth';
 import fs from "fs";
@@ -33,6 +32,8 @@ const uploadHighlightVideo = async (videoPath: string): Promise<void> => {
 
 // very basic example of uploading a video to youtube
 const upload = async (fileName: string) => {
+    const auth = await getOAuth2Client();
+    
     google.options({ auth });
 
     const res = await youtube.videos.insert(
@@ -58,18 +59,20 @@ const upload = async (fileName: string) => {
 };
 
 const getOAuth2Client = async () => {
+    const refreshPath = "config/refresh.json";
+    
     // If a refresh token is available then use it, otherwise create one by requesting access from the user.
-    if (fs.existsSync('../config/refresh.json')) {
-        const clientSecret = JSON.parse(fs.readFileSync('../config/client_secret.json').toString());
-        const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
+    if (fs.existsSync(refreshPath)) {
+        const clientSecret = JSON.parse(fs.readFileSync("config/client_secret.json").toString());
+        const auth = new google.auth.OAuth2(clientSecret.web.client_id, clientSecret.web.client_secret, clientSecret.web.redirect_uris[0]);
 
-        const refreshToken = JSON.parse(fs.readFileSync('../config/refresh.json').toString());
+        const refreshToken = JSON.parse(fs.readFileSync(refreshPath).toString());
         auth.setCredentials({ refresh_token: refreshToken.refresh_token });
 
         return auth;
     } else {
         const auth = await authenticate({
-            keyfilePath: '../config/client_secret.json',
+            keyfilePath: "config/client_secret.json",
             scopes: [
                 'https://www.googleapis.com/auth/youtube.upload',
                 'https://www.googleapis.com/auth/youtube',
