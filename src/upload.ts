@@ -32,9 +32,8 @@ const uploadHighlightVideo = async (videoPath: string): Promise<void> => {
 // };
 
 // very basic example of uploading a video to youtube
-const upload = async (fileName: string) => {
+const upload = async (fileName: string): Promise<void> => {
     const auth = await getOAuth2Client();
-
     google.options({ auth });
 
     const res = await youtube.videos.insert(
@@ -56,7 +55,6 @@ const upload = async (fileName: string) => {
         }
     );
     console.log(res.data);
-    return res.data;
 };
 
 const getOAuth2Client = async () => {
@@ -73,13 +71,11 @@ const getOAuth2Client = async () => {
 
         return auth;
     } else {
-        const auth = await createNewToken(clientSecretPath, refreshPath);
-
-        return auth;
+        return await createNewToken(clientSecretPath, refreshPath);
     }
 };
 
-// Creating a new access token and saving the refresh token to refresh.json in the config folder.
+// Creating a new OAuth2 access token and saving the refresh token to the given refreshPath.
 const createNewToken = async (clientSecretPath: string, refreshPath: string) => {
     const auth = await authenticate({
         keyfilePath: path.join(__dirname, `../${clientSecretPath}`),
@@ -93,6 +89,5 @@ const createNewToken = async (clientSecretPath: string, refreshPath: string) => 
 
     return auth;
 };
-
 
 export { uploadHighlightVideo };
