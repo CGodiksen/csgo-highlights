@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import fs from "fs";
 import path from "path";
@@ -14,6 +12,12 @@ interface Metadata {
     title: string;
     description: string;
     tags: string[];
+}
+
+interface ClientSecret {
+    client_id: string;
+    client_secret: string;
+    redirect_uris: string[];
 }
 
 const uploadHighlightVideo = async (videoPath: string, match: FullMatch): Promise<void> => {
@@ -70,8 +74,8 @@ const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
 
     // If a refresh token is available then use it, otherwise create one by requesting access from the user.
     if (fs.existsSync(refreshPath)) {
-        const clientSecret = JSON.parse(fs.readFileSync(clientSecretPath).toString());
-        const auth = new google.auth.OAuth2(clientSecret.web.client_id, clientSecret.web.client_secret, clientSecret.web.redirect_uris[0]);
+        const clientSecret = JSON.parse(fs.readFileSync(clientSecretPath).toString()) as ClientSecret;
+        const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
 
         const refreshToken = JSON.parse(fs.readFileSync(refreshPath).toString());
         auth.setCredentials({ refresh_token: refreshToken.refresh_token });
@@ -83,7 +87,7 @@ const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
 };
 
 // Creating a new OAuth2 access token and saving the refresh token to the given refreshPath.
-const createNewToken = async (clientSecretPath: string, refreshPath: string) => {
+const createNewToken = async (clientSecretPath: string, refreshPath: string): Promise<Auth.OAuth2Client> => {
     const auth = await authenticate({
         keyfilePath: path.join(__dirname, `../${clientSecretPath}`),
         scopes: [
