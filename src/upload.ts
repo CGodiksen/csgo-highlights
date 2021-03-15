@@ -11,12 +11,18 @@ import { FullMatch } from "hltv/lib/models/FullMatch";
 // initialize the Youtube API library
 const youtube = google.youtube('v3');
 
+interface Metadata {
+    title: string;
+    description: string;
+    tags: string[];
+}
+
 const uploadHighlightVideo = async (videoPath: string, match: FullMatch): Promise<void> => {
 
-    const title = createTitle(match);
+    const metadata = createMetadata(match);
 
     try {
-        await upload(videoPath, title, "filler");
+        await upload(videoPath, metadata);
         console.log(`"Uploaded" the highlight video at ${videoPath} to Youtube`);
     } catch (uploadError) {
         console.error(uploadError);
@@ -28,7 +34,7 @@ const createTitle = (match: FullMatch): string => {
 };
 
 // Upload the given video to Youtube using an OAuth2 client.
-const upload = async (filePath: string, title: string, description: string): Promise<void> => {
+const upload = async (filePath: string, metadata: Metadata): Promise<void> => {
     const auth = await getOAuth2Client();
     google.options({ auth });
 
@@ -38,10 +44,10 @@ const upload = async (filePath: string, title: string, description: string): Pro
             notifySubscribers: false,
             requestBody: {
                 snippet: {
-                    title: title,
-                    description: description,
+                    title: metadata.title,
+                    description: metadata.description,
                     categoryId: "20", // Setting the category to "gaming".
-                    tags: ["csgo highlights", "csgo pro", "twitch highlights", "csgo vod", "counter strike", "global offensive"]
+                    tags: ["csgo highlights", "csgo pro", "twitch highlights", "csgo vod", "counter strike", "global offensive"].concat(metadata.tags)
                 },
                 status: {
                     privacyStatus: 'private',
