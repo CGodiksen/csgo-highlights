@@ -4,7 +4,7 @@ import { google, Auth } from 'googleapis';
 import { authenticate } from '@google-cloud/local-auth';
 import { FullMatch } from "hltv/lib/models/FullMatch";
 
-// initialize the Youtube API library
+// Initialize the Youtube API library.
 const youtube = google.youtube('v3');
 
 interface Metadata {
@@ -26,7 +26,7 @@ const uploadHighlightVideo = async (videoPath: string, match: FullMatch): Promis
 
     try {
         await upload(videoPath, metadata);
-        console.log(`"Uploaded" the highlight video at ${videoPath} to Youtube`);
+        console.log(`Uploaded the highlight video at ${videoPath} to Youtube with the title: ${metadata.title}`);
     } catch (uploadError) {
         console.error(uploadError);
     }
