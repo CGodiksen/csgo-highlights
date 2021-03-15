@@ -15,9 +15,11 @@ interface Metadata {
 }
 
 interface OAuthKey {
-    client_id: string;
-    client_secret: string;
-    redirect_uris: string[];
+    web: {
+        client_id: string;
+        client_secret: string;
+        redirect_uris: string[];
+    }
 }
 
 const uploadHighlightVideo = async (videoPath: string, match: FullMatch): Promise<void> => {
@@ -76,6 +78,7 @@ const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
     if (fs.existsSync(refreshPath)) {
         const oAuthKey = JSON.parse(fs.readFileSync(oAuthKeyPath).toString()) as OAuthKey;
         const auth = new google.auth.OAuth2(oAuthKey.client_id, oAuthKey.client_secret, oAuthKey.redirect_uris[0]);
+        const auth = new google.auth.OAuth2(oAuthKey.web.client_id, oAuthKey.web.client_secret, oAuthKey.web.redirect_uris[0]);
 
         const refreshToken = JSON.parse(fs.readFileSync(refreshPath).toString());
         auth.setCredentials({ refresh_token: refreshToken.refresh_token });
