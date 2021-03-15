@@ -14,7 +14,7 @@ interface Metadata {
     tags: string[];
 }
 
-interface ClientSecret {
+interface OAuthKey {
     client_id: string;
     client_secret: string;
     redirect_uris: string[];
@@ -70,26 +70,26 @@ const upload = async (filePath: string, metadata: Metadata): Promise<void> => {
 
 const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
     const refreshPath = "config/refresh.json";
-    const clientSecretPath = "config/client_secret.json";
+    const oAuthKeyPath = "config/oauth_key.json";
 
     // If a refresh token is available then use it, otherwise create one by requesting access from the user.
     if (fs.existsSync(refreshPath)) {
-        const clientSecret = JSON.parse(fs.readFileSync(clientSecretPath).toString()) as ClientSecret;
-        const auth = new google.auth.OAuth2(clientSecret.client_id, clientSecret.client_secret, clientSecret.redirect_uris[0]);
+        const oAuthKey = JSON.parse(fs.readFileSync(oAuthKeyPath).toString()) as OAuthKey;
+        const auth = new google.auth.OAuth2(oAuthKey.client_id, oAuthKey.client_secret, oAuthKey.redirect_uris[0]);
 
         const refreshToken = JSON.parse(fs.readFileSync(refreshPath).toString());
         auth.setCredentials({ refresh_token: refreshToken.refresh_token });
 
         return auth;
     } else {
-        return await createNewToken(clientSecretPath, refreshPath);
+        return await createNewToken(oAuthKeyPath, refreshPath);
     }
 };
 
 // Creating a new OAuth2 access token and saving the refresh token to the given refreshPath.
-const createNewToken = async (clientSecretPath: string, refreshPath: string): Promise<Auth.OAuth2Client> => {
+const createNewToken = async (oAuthKeyPath: string, refreshPath: string): Promise<Auth.OAuth2Client> => {
     const auth = await authenticate({
-        keyfilePath: path.join(__dirname, `../${clientSecretPath}`),
+        keyfilePath: path.join(__dirname, `../${oAuthKeyPath}`),
         scopes: [
             'https://www.googleapis.com/auth/youtube.upload',
             'https://www.googleapis.com/auth/youtube',
