@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import fs from "fs";
 import path from "path";
-import { google } from 'googleapis';
+import { google, Auth } from 'googleapis';
 import { authenticate } from '@google-cloud/local-auth';
 import { FullMatch } from "hltv/lib/models/FullMatch";
 
@@ -18,7 +17,6 @@ interface Metadata {
 }
 
 const uploadHighlightVideo = async (videoPath: string, match: FullMatch): Promise<void> => {
-
     const metadata = createMetadata(match);
 
     try {
@@ -66,7 +64,7 @@ const upload = async (filePath: string, metadata: Metadata): Promise<void> => {
     console.log(res.data);
 };
 
-const getOAuth2Client = async () => {
+const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
     const refreshPath = "config/refresh.json";
     const clientSecretPath = "config/client_secret.json";
 
