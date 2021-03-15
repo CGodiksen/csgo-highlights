@@ -27,8 +27,8 @@ const createTitle = (match: FullMatch): string => {
     return `${match.team1!.name} vs ${match.team2!.name} - ${match.event.name}`;
 };
 
-// very basic example of uploading a video to youtube
-const upload = async (fileName: string, title: string, description: string): Promise<void> => {
+// Upload the given video to Youtube using an OAuth2 client.
+const upload = async (filePath: string, title: string, description: string): Promise<void> => {
     const auth = await getOAuth2Client();
     google.options({ auth });
 
@@ -40,13 +40,15 @@ const upload = async (fileName: string, title: string, description: string): Pro
                 snippet: {
                     title: title,
                     description: description,
+                    categoryId: "20", // Setting the category to "gaming".
+                    tags: ["csgo highlights", "csgo pro", "twitch highlights", "csgo vod", "counter strike", "global offensive"]
                 },
                 status: {
                     privacyStatus: 'private',
                 },
             },
             media: {
-                body: fs.createReadStream(fileName),
+                body: fs.createReadStream(filePath),
             },
         }
     );
