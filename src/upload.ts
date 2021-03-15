@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import fs from "fs";
 import path from "path";
 import { google, Auth } from 'googleapis';
@@ -71,26 +70,25 @@ const upload = async (filePath: string, metadata: Metadata): Promise<void> => {
 };
 
 const getOAuth2Client = async (): Promise<Auth.OAuth2Client> => {
-    const refreshPath = "config/refresh.json";
+    const credentialsPath = "config/credentials.json";
     const oAuthKeyPath = "config/oauth_key.json";
 
-    // If a refresh token is available then use it, otherwise create one by requesting access from the user.
-    if (fs.existsSync(refreshPath)) {
+    // If credentials are already saved then use them, otherwise create new credentials by requesting access from the user.
+    if (fs.existsSync(credentialsPath)) {
         const oAuthKey = JSON.parse(fs.readFileSync(oAuthKeyPath).toString()) as OAuthKey;
-        const auth = new google.auth.OAuth2(oAuthKey.client_id, oAuthKey.client_secret, oAuthKey.redirect_uris[0]);
         const auth = new google.auth.OAuth2(oAuthKey.web.client_id, oAuthKey.web.client_secret, oAuthKey.web.redirect_uris[0]);
 
-        const refreshToken = JSON.parse(fs.readFileSync(refreshPath).toString());
-        auth.setCredentials({ refresh_token: refreshToken.refresh_token });
+        const credentials = JSON.parse(fs.readFileSync(credentialsPath).toString()) as Auth.Credentials;
+        auth.setCredentials(credentials);
 
         return auth;
     } else {
-        return await createNewToken(oAuthKeyPath, refreshPath);
+        return await createNewCredentials(oAuthKeyPath, credentialsPath);
     }
 };
 
-// Creating a new OAuth2 access token and saving the refresh token to the given refreshPath.
-const createNewToken = async (oAuthKeyPath: string, refreshPath: string): Promise<Auth.OAuth2Client> => {
+// Creating new OAuth2 access credentials and saving them to the given credentials path.
+const createNewCredentials = async (oAuthKeyPath: string, credentialsPath: string): Promise<Auth.OAuth2Client> => {
     const auth = await authenticate({
         keyfilePath: path.join(__dirname, `../${oAuthKeyPath}`),
         scopes: [
@@ -99,8 +97,7 @@ const createNewToken = async (oAuthKeyPath: string, refreshPath: string): Promis
         ],
     });
 
-    fs.writeFileSync(refreshPath, JSON.stringify({ refresh_token: auth.credentials.refresh_token! }));
-
+    fs.writeFileSync(credentialsPath, JSON.stringify(auth.credentials));
     return auth;
 };
 
